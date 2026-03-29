@@ -2,21 +2,10 @@ spring:
   application:
     name: smart-campus-backend
 
-  datasource:
-    url: jdbc:h2:mem:smartcampusdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb+srv://smart_campus:campus123@cluster0.fjz2qj0.mongodb.net/?appName=Cluster0}
+      database: smart-campus
 
 server:
   port: 8080

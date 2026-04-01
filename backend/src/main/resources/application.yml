@@ -8,7 +8,7 @@ spring:
       database: smart-campus
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8090}
 
 logging:
   level:

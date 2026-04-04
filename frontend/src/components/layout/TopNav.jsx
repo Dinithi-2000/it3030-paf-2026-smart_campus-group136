@@ -1,4 +1,6 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
+import "./TopNav.css";
 
 const navItems = [
   { to: "/", label: "Dashboard" },
@@ -10,6 +12,14 @@ const navItems = [
 ];
 
 function TopNav() {
+  const { user, roles, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <header className="top-nav-wrap">
       <div className="brand-block">
@@ -30,6 +40,15 @@ function TopNav() {
           </NavLink>
         ))}
       </nav>
+      <div className="user-menu">
+        <div className="user-info">
+          <span className="username">{user?.displayName || user?.username || "User"}</span>
+          <span className="user-role">{roles?.[0] || "USER"}</span>
+        </div>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
     </header>
   );
 }

@@ -1,17 +1,70 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import AuthService from "../api/authService";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedRoles = localStorage.getItem("roles");
+    if (storedUser && storedRoles) {
+      setUser(JSON.parse(storedUser));
+      setRoles(JSON.parse(storedRoles));
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (username, password) => {
+    try {
+      const data = await AuthService.login(username, password);
+      const userData = data.user || { username: data.username };
+      const userRoles = data.roles || ["USER"];
+      
+      setUser(userData);
+      setRoles(userRoles);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("roles", JSON.stringify(userRoles));
+      localStorage.setItem("authToken", btoa(`${username}:${password}`));
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || "Login failed" };
+    }
+  };
+
+  const register = async (username, displayName, email) => {
+    try {
+      await AuthService.register(username, displayName, email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || "Registration failed" };
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setRoles([]);
+    AuthService.logout();
+  };
+
+  const hasRole = (role) => roles.includes(role);
 
   const value = useMemo(
     () => ({
       user,
-      signIn: setUser,
-      signOut: () => setUser(null)
+      roles,
+      loading,
+      login,
+      register,
+      logout,
+      hasRole,
+      isAuthenticated: !!user
     }),
-    [user]
+    [user, roles, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -24,3 +77,4 @@ export function useAuth() {
   }
   return context;
 }
+

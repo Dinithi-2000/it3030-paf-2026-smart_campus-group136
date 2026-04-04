@@ -1,0 +1,56 @@
+package com.sliit.smartcampus.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+                        .requestMatchers("/api/users/me").authenticated()
+                        .requestMatchers("/api/roles/**").authenticated()
+                        .anyRequest().permitAll()
+                )
+                .httpBasic();
+        return http.build();
+    }
+
+    @Bean
+    public UserDetailsService users(PasswordEncoder encoder) {
+        var admin = User.withUsername("admin")
+                .password(encoder.encode("adminpass"))
+                .roles("ADMIN")
+                .build();
+
+        var user = User.withUsername("user")
+                .password(encoder.encode("userpass"))
+                .roles("USER")
+                .build();
+
+        var tech = User.withUsername("tech")
+                .password(encoder.encode("techpass"))
+                .roles("TECHNICIAN")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin, user, tech);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}

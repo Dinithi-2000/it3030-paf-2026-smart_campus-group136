@@ -41,7 +41,12 @@ export function AuthProvider({ children }) {
       await AuthService.register(username, displayName, email);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || "Registration failed" };
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        (error.code === "ECONNABORTED" ? "Request timed out. Backend or database may be unavailable." : null) ||
+        "Registration failed";
+      return { success: false, error: message };
     }
   };
 

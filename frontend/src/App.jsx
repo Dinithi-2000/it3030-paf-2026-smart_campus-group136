@@ -6,6 +6,7 @@ import DashboardPage from "./pages/DashboardPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import TicketsPage from "./pages/TicketsPage";
+import bookingRoutes from "./features/bookings/bookingRoutes";
 
 function App() {
   return (
@@ -17,6 +18,9 @@ function App() {
         <Route path="/tickets" element={<TicketsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        {bookingRoutes.map((route) => (
+          <Route key={route.path} path={route.path} element={route.element} />
+        ))}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>

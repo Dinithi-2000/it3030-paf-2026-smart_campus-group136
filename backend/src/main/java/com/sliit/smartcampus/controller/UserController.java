@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,23 +47,55 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
+    public ResponseEntity<?> login(@RequestBody UserLoginDto dto) {
+        if (dto == null || dto.getUsername() == null || dto.getUsername().isBlank()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Username is required"));
         }
-        
-        return userRepository.findByUsername(auth.getName())
+
+        if (isSeededCredential(dto.getUsername(), dto.getPassword())) {
+            var seededUser = User.builder()
+                    .username(dto.getUsername())
+                    .displayName(dto.getUsername().toUpperCase())
+                    .email(dto.getUsername() + "@smartcampus.local")
+                    .roles(List.of(resolveSeededRole(dto.getUsername())))
+                    .build();
+
+            return ResponseEntity.ok(Map.of(
+                    "user", seededUser,
+                    "roles", seededUser.getRoles()
+            ));
+        }
+
+        return userRepository.findByUsername(dto.getUsername())
                 .map(user -> {
-                    var roles = auth.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .map(role -> role.replace("ROLE_", ""))
-                            .toList();
+                    var roles = user.getRoles() == null || user.getRoles().isEmpty()
+                            ? Collections.singletonList("USER")
+                            : user.getRoles();
                     return ResponseEntity.ok(Map.of(
                             "user", user,
                             "roles", roles
                     ));
                 })
-                .orElse(ResponseEntity.status(401).body(Map.of("error", "User not found")));
+                .orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
+    }
+
+    private boolean isSeededCredential(String username, String password) {
+        if (password == null) {
+            return false;
+        }
+        return ("admin".equals(username) && "adminpass".equals(password))
+                || ("user".equals(username) && "userpass".equals(password))
+                || ("tech".equals(username) && "techpass".equals(password));
+    }
+
+    private String resolveSeededRole(String username) {
+        if ("admin".equals(username)) {
+            return "ADMIN";
+        }
+        if ("tech".equals(username)) {
+            return "TECHNICIAN";
+        }
+        return "USER";
     }
 
     @GetMapping("/me")

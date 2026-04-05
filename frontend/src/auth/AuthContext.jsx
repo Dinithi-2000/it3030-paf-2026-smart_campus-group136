@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
       const data = await AuthService.login(username, password);
       const userData = data.user || { username: data.username };
       const userRoles = data.roles || ["USER"];
+      const redirectTo = userRoles.includes("ADMIN") ? "/admin-dashboard" : "/";
       
       setUser(userData);
       setRoles(userRoles);
@@ -30,7 +31,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem("roles", JSON.stringify(userRoles));
       localStorage.setItem("authToken", btoa(`${username}:${password}`));
       
-      return { success: true };
+      return { success: true, user: userData, roles: userRoles, redirectTo };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || "Login failed" };
     }

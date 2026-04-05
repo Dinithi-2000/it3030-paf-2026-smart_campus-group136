@@ -20,14 +20,14 @@ export function ProtectedRoute({ children, requiredRole = null }) {
 }
 
 export function PublicRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, hasRole, loading } = useAuth();
 
   if (loading) {
     return <div className="loading-container">Loading...</div>;
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={hasRole("ADMIN") ? "/admin-dashboard" : "/"} replace />;
   }
 
   return children;

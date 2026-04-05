@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017/smart-campus}
+      uri: mongodb+srv://smart_campus:campus123@smart-campus.0qzolar.mongodb.net/?appName=smart-campus
       database: smart-campus
 
 server:

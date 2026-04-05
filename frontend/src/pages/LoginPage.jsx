@@ -21,7 +21,7 @@ export default function LoginPage() {
     
     const result = await login(username, password);
     if (result.success) {
-      navigate("/");
+      navigate(result.redirectTo || "/");
     } else {
       setError(result.error);
     }

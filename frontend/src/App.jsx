@@ -5,8 +5,9 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import AdminPage from "./pages/AdminPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 import BookingsPage from "./pages/BookingsPage";
-import DashboardPage from "./pages/DashboardPage";
+import RoleBasedDashboardPage from "./pages/RoleBasedDashboardPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import TicketsPage from "./pages/TicketsPage";
@@ -39,7 +40,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <DashboardPage />
+              <RoleBasedDashboardPage />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -90,6 +91,16 @@ function App() {
           <ProtectedRoute requiredRole="ADMIN">
             <AppLayout>
               <AdminPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AppLayout>
+              <AdminDashboardPage />
             </AppLayout>
           </ProtectedRoute>
         }

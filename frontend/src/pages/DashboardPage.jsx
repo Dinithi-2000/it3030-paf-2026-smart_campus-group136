@@ -1,4 +1,6 @@
 import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 const navItems = [
   { label: "Dashboard", to: "/", icon: "dashboard" },
@@ -86,6 +88,14 @@ function metricIcon(type) {
 }
 
 function DashboardPage() {
+  const { user, roles, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <section className="ops-shell">
       <aside className="ops-sidebar">
@@ -124,7 +134,7 @@ function DashboardPage() {
             <span className="foot-icon">*</span>
             Settings
           </button>
-          <button type="button" className="danger">
+          <button type="button" className="danger" onClick={handleLogout}>
             <span className="foot-icon">&rarr;</span>
             Sign Out
           </button>
@@ -143,7 +153,12 @@ function DashboardPage() {
                 />
               </svg>
             </button>
-            <button type="button" aria-label="Quick logout" className="logout-soft">
+            <button
+              type="button"
+              aria-label="Quick logout"
+              className="logout-soft"
+              onClick={handleLogout}
+            >
               <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
                 <path
                   d="M10 4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-8a1 1 0 1 1 0-2h7V5h-7a1 1 0 0 1-1-1ZM13.7 12.7a1 1 0 0 0 0-1.4l-2-2a1 1 0 1 0-1.4 1.4L10.59 11H4a1 1 0 1 0 0 2h6.59l-.29.29a1 1 0 1 0 1.4 1.42l2-2.01Z"
@@ -153,10 +168,10 @@ function DashboardPage() {
             </button>
             <div className="ops-user">
               <div>
-                <strong>Google User</strong>
-                <span>USER</span>
+                <strong>{user?.displayName || user?.username || "Campus User"}</strong>
+                <span>{roles?.[0] || "USER"}</span>
               </div>
-              <div className="avatar">G</div>
+              <div className="avatar">{(user?.displayName || user?.username || "U").charAt(0).toUpperCase()}</div>
             </div>
           </div>
         </header>

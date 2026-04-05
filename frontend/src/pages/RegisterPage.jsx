@@ -36,7 +36,7 @@ export default function RegisterPage() {
     // Extract username from email
     const username = email.split("@")[0];
 
-    const result = await register(username, fullName, email);
+    const result = await register(username, fullName, email, selectedRole);
     if (result.success) {
       setSuccess("Profile created successfully! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000);

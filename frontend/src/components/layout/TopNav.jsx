@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import "./TopNav.css";
 
@@ -14,6 +14,13 @@ const navItems = [
 function TopNav() {
   const { user, roles, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const normalizeRole = (role) =>
+    role ? role.toLowerCase().replace(/^./, (char) => char.toUpperCase()) : "User";
+
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const roleLabel = isAdminRoute ? "Admin" : normalizeRole(roles?.[0] || "USER");
 
   const handleLogout = () => {
     logout();
@@ -43,7 +50,7 @@ function TopNav() {
       <div className="user-menu">
         <div className="user-info">
           <span className="username">{user?.displayName || user?.username || "User"}</span>
-          <span className="user-role">{roles?.[0] || "USER"}</span>
+          <span className="user-role">{roleLabel}</span>
         </div>
         <button className="logout-btn" onClick={handleLogout}>
           Logout

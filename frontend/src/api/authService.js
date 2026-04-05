@@ -8,11 +8,12 @@ const AuthService = {
     return response.data;
   },
 
-  register: async (username, displayName, email) => {
+  register: async (username, displayName, email, role = "USER") => {
     const response = await client.post("/users/register", {
       username,
       displayName,
-      email
+      email,
+      role
     });
     return response.data;
   },

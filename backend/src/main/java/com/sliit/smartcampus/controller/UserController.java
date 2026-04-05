@@ -31,11 +31,16 @@ public class UserController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
             }
 
+            String requestedRole = dto.getRole() == null ? "USER" : dto.getRole().trim().toUpperCase();
+            if (!List.of("USER", "ADMIN", "TECHNICIAN").contains(requestedRole)) {
+                requestedRole = "USER";
+            }
+
             var user = User.builder()
                     .username(dto.getUsername())
                     .displayName(dto.getDisplayName())
                     .email(dto.getEmail())
-                    .roles(List.of("USER"))
+                    .roles(List.of(requestedRole))
                     .build();
 
             var saved = userRepository.save(user);
@@ -68,9 +73,7 @@ public class UserController {
 
         return userRepository.findByUsername(dto.getUsername())
                 .map(user -> {
-                    var roles = user.getRoles() == null || user.getRoles().isEmpty()
-                            ? Collections.singletonList("USER")
-                            : user.getRoles();
+                    var roles = resolveLoginRoles(user, dto);
                     return ResponseEntity.ok(Map.of(
                             "user", user,
                             "roles", roles
@@ -79,20 +82,46 @@ public class UserController {
                 .orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
     }
 
+    private List<String> resolveLoginRoles(User user, UserLoginDto dto) {
+        if (user == null) {
+            return Collections.singletonList("USER");
+        }
+
+        String username = dto != null ? dto.getUsername() : null;
+        String password = dto != null ? dto.getPassword() : null;
+        boolean isRequestedAdminCredential = username != null
+                && "Admin123".equalsIgnoreCase(username.trim())
+                && "Admin@123".equals(password);
+
+        if (isRequestedAdminCredential) {
+            return List.of("ADMIN");
+        }
+
+        return user.getRoles() == null || user.getRoles().isEmpty()
+                ? Collections.singletonList("USER")
+                : user.getRoles();
+    }
+
     private boolean isSeededCredential(String username, String password) {
-        if (password == null) {
+        if (username == null || password == null) {
             return false;
         }
-        return ("admin".equals(username) && "adminpass".equals(password))
-                || ("user".equals(username) && "userpass".equals(password))
-                || ("tech".equals(username) && "techpass".equals(password));
+        String normalizedUsername = username.trim();
+        return ("admin".equalsIgnoreCase(normalizedUsername) && "adminpass".equals(password))
+                || ("user".equalsIgnoreCase(normalizedUsername) && "userpass".equals(password))
+                || ("tech".equalsIgnoreCase(normalizedUsername) && "techpass".equals(password))
+                || ("Admin123".equalsIgnoreCase(normalizedUsername) && "Admin@123".equals(password));
     }
 
     private String resolveSeededRole(String username) {
-        if ("admin".equals(username)) {
+        if (username == null) {
+            return "USER";
+        }
+
+        if ("admin".equalsIgnoreCase(username) || "Admin123".equalsIgnoreCase(username)) {
             return "ADMIN";
         }
-        if ("tech".equals(username)) {
+        if ("tech".equalsIgnoreCase(username)) {
             return "TECHNICIAN";
         }
         return "USER";
@@ -144,6 +173,7 @@ public class UserController {
         public String username;
         public String displayName;
         public String email;
+        public String role;
 
         public String getUsername() {
             return username;
@@ -167,6 +197,14 @@ public class UserController {
 
         public void setEmail(String email) {
             this.email = email;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
         }
     }
 }

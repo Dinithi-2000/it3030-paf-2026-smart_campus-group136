@@ -6,7 +6,7 @@ const navItems = [
   { label: "Dashboard", to: "/", icon: "dashboard" },
   { label: "Resources", to: "/facilities", icon: "resources" },
   { label: "Booking", to: "/bookings", icon: "booking" },
-  { label: "Ticketing", to: "/tickets", icon: "ticketing" },
+  { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
   { label: "Notifications", to: "/notifications", icon: "notifications" },
   { label: "Analytics", to: "/admin", icon: "analytics" }
 ];

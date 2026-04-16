@@ -108,6 +108,10 @@ public class TicketService {
 
         validateTransition(ticket.getStatus(), request.getStatus());
 
+        if (request.getStatus() == TicketStatus.REJECTED && actor.role() != ActorRole.ADMIN) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Only ADMIN can set ticket status to REJECTED");
+        }
+
         if (request.getStatus() == TicketStatus.REJECTED && !StringUtils.hasText(request.getRejectionReason())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Rejection reason is required when status is REJECTED");
         }

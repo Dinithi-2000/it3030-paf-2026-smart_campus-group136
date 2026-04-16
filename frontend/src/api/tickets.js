@@ -6,14 +6,36 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function currentUser() {
-  const userId = localStorage.getItem("smartcampus.userId") || "student001";
-  const userName = localStorage.getItem("smartcampus.userName") || "Google User";
-  return { userId, userName };
+function safeParse(value, fallback) {
+  try {
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function currentActor() {
+  const user = safeParse(localStorage.getItem("user"), null);
+  const roles = safeParse(localStorage.getItem("roles"), []);
+
+  const userId = user?.id || user?.username || "student001";
+  const userName = user?.displayName || user?.username || "Campus User";
+  const role = Array.isArray(roles) && roles.length > 0 ? roles[0] : "USER";
+
+  return { userId, userName, role };
+}
+
+function actorHeaders() {
+  const { userId, userName, role } = currentActor();
+  return {
+    "X-User-Id": userId,
+    "X-User-Name": userName,
+    "X-User-Role": role
+  };
 }
 
 function seedTickets() {
-  const { userId, userName } = currentUser();
+  const { userId, userName } = currentActor();
   return [
     {
       id: "TK-1001",
@@ -97,10 +119,30 @@ function writeMockTickets(tickets) {
   localStorage.setItem(MOCK_KEY, JSON.stringify(tickets));
 }
 
+function mergeById(primary, secondary) {
+  const merged = [...primary];
+  const existingIds = new Set(primary.map((ticket) => ticket.id));
+  for (const ticket of secondary) {
+    if (!existingIds.has(ticket.id)) {
+      merged.push(ticket);
+    }
+  }
+  return merged;
+}
+
 function filterUserTickets(tickets) {
-  const { userId } = currentUser();
+  const { userId, role } = currentActor();
+
+  if (role === "ADMIN") {
+    return [...tickets].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
   return tickets
-    .filter((ticket) => ticket.createdByUserId === userId)
+    .filter(
+      (ticket) =>
+        ticket.createdByUserId === userId ||
+        (role === "TECHNICIAN" && ticket.assignedTechnicianId === userId)
+    )
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
@@ -114,8 +156,13 @@ function makeCommentId() {
 
 export async function fetchTickets(filters = {}) {
   try {
-    const response = await client.get("/tickets", { params: filters });
-    return filterUserTickets(response.data || []);
+    const response = await client.get("/tickets", {
+      params: filters,
+      headers: actorHeaders()
+    });
+    const serverTickets = (response.data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const localTickets = filterUserTickets(readMockTickets());
+    return mergeById(serverTickets, localTickets).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } catch {
     return filterUserTickets(readMockTickets());
   }
@@ -136,13 +183,24 @@ export async function createTicket(payload) {
 
   try {
     const response = await client.post("/tickets", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
+      headers: actorHeaders()
     });
+
+    // Remove any local fallback ticket that matches this freshly created ticket details.
+    const current = readMockTickets();
+    const cleaned = current.filter(
+      (ticket) =>
+        !(
+          ticket.resourceId === response.data?.resourceId &&
+          ticket.description === response.data?.description &&
+          ticket.location === response.data?.location
+        )
+    );
+    writeMockTickets(cleaned);
+
     return response.data;
   } catch {
-    const { userId, userName } = currentUser();
+    const { userId, userName } = currentActor();
     const existing = readMockTickets();
     const created = {
       id: makeTicketId(),
@@ -178,10 +236,14 @@ export async function createTicket(payload) {
 
 export async function addComment(ticketId, content) {
   try {
-    const response = await client.post(`/tickets/${ticketId}/comments`, { content });
+    const response = await client.post(
+      `/tickets/${ticketId}/comments`,
+      { content },
+      { headers: actorHeaders() }
+    );
     return response.data;
   } catch {
-    const { userId, userName } = currentUser();
+    const { userId, userName, role } = currentActor();
     const tickets = readMockTickets();
     const updated = tickets.map((ticket) => {
       if (ticket.id !== ticketId) {
@@ -191,7 +253,7 @@ export async function addComment(ticketId, content) {
         id: makeCommentId(),
         authorId: userId,
         authorName: userName,
-        authorRole: "USER",
+        authorRole: role,
         content,
         createdAt: nowIso(),
         updatedAt: nowIso()
@@ -203,12 +265,17 @@ export async function addComment(ticketId, content) {
       };
     });
     writeMockTickets(updated);
+    return updated.find((ticket) => ticket.id === ticketId);
   }
 }
 
 export async function updateComment(ticketId, commentId, content) {
   try {
-    const response = await client.patch(`/tickets/${ticketId}/comments/${commentId}`, { content });
+    const response = await client.patch(
+      `/tickets/${ticketId}/comments/${commentId}`,
+      { content },
+      { headers: actorHeaders() }
+    );
     return response.data;
   } catch {
     const tickets = readMockTickets();
@@ -222,12 +289,15 @@ export async function updateComment(ticketId, commentId, content) {
       return { ...ticket, comments, updatedAt: nowIso() };
     });
     writeMockTickets(updated);
+    return updated.find((ticket) => ticket.id === ticketId);
   }
 }
 
 export async function deleteComment(ticketId, commentId) {
   try {
-    await client.delete(`/tickets/${ticketId}/comments/${commentId}`);
+    await client.delete(`/tickets/${ticketId}/comments/${commentId}`, {
+      headers: actorHeaders()
+    });
   } catch {
     const tickets = readMockTickets();
     const updated = tickets.map((ticket) => {
@@ -238,15 +308,22 @@ export async function deleteComment(ticketId, commentId) {
       return { ...ticket, comments, updatedAt: nowIso() };
     });
     writeMockTickets(updated);
+    return updated.find((ticket) => ticket.id === ticketId);
   }
+
+  return null;
 }
 
 export async function assignTechnician(ticketId, body) {
-  const response = await client.put(`/tickets/${ticketId}/assignment`, body);
+  const response = await client.put(`/tickets/${ticketId}/assignment`, body, {
+    headers: actorHeaders()
+  });
   return response.data;
 }
 
 export async function updateTicketStatus(ticketId, body) {
-  const response = await client.patch(`/tickets/${ticketId}/status`, body);
+  const response = await client.patch(`/tickets/${ticketId}/status`, body, {
+    headers: actorHeaders()
+  });
   return response.data;
 }

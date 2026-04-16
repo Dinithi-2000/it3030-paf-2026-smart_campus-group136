@@ -10,6 +10,7 @@ import BookingsPage from "./pages/BookingsPage";
 import RoleBasedDashboardPage from "./pages/RoleBasedDashboardPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import RoleBasedTicketsPage from "./pages/RoleBasedTicketsPage";
 import TicketsPage from "./pages/TicketsPage";
 
 function App() {
@@ -67,6 +68,16 @@ function App() {
       />
       <Route
         path="/tickets"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <RoleBasedTicketsPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user-tickets"
         element={
           <ProtectedRoute>
             <AppLayout>

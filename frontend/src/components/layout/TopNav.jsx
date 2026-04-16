@@ -6,7 +6,6 @@ const navItems = [
   { to: "/", label: "Dashboard" },
   { to: "/facilities", label: "Facilities" },
   { to: "/bookings", label: "Bookings" },
-  { to: "/tickets", label: "Tickets" },
   { to: "/notifications", label: "Notifications" },
   { to: "/admin", label: "Analytics" }
 ];
@@ -21,6 +20,7 @@ function TopNav() {
 
   const isAdminRoute = location.pathname.startsWith("/admin");
   const roleLabel = isAdminRoute ? "Admin" : normalizeRole(roles?.[0] || "USER");
+  const ticketPath = roles?.includes("ADMIN") || roles?.includes("TECHNICIAN") ? "/tickets" : "/user-tickets";
 
   const handleLogout = () => {
     logout();
@@ -34,6 +34,14 @@ function TopNav() {
         <h2>Operations Hub</h2>
       </div>
       <nav className="top-nav" aria-label="Primary navigation">
+        <NavLink
+          to={ticketPath}
+          className={({ isActive }) =>
+            `top-nav-link${isActive ? " top-nav-link-active" : ""}`
+          }
+        >
+          Tickets
+        </NavLink>
         {navItems.map((item) => (
           <NavLink
             key={item.to}

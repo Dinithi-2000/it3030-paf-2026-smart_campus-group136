@@ -3,7 +3,10 @@ import { useLocation } from "react-router-dom";
 
 function AppLayout({ children }) {
   const location = useLocation();
-  const isDashboardRoute = location.pathname === "/" || location.pathname === "/admin-dashboard";
+  const isDashboardRoute =
+    location.pathname === "/" ||
+    location.pathname === "/admin-dashboard" ||
+    location.pathname === "/user-tickets";
   const showTopNav = !isDashboardRoute;
 
   return (

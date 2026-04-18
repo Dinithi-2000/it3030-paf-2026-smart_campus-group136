@@ -1,10 +1,10 @@
 package com.sliit.smartcampus.repository;
 
 import com.sliit.smartcampus.model.Role;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface RoleRepository extends MongoRepository<Role, String> {
+public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByName(String name);
 }

@@ -1,24 +1,34 @@
 package com.sliit.smartcampus.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.persistence.*;
 import java.util.List;
 
-@Document(collection = "users")
+@Entity
+@Table(name = "users")
 public class User {
-    @Id
-    private String id;
-    private String username;
-    private String displayName;
-    private String email;
-    private List<String> roles; // list of role names assigned to the user
 
-    public String getId() {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    private String displayName;
+
+    @Column(unique = true)
+    private String email;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private List<String> roles;
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -59,16 +69,10 @@ public class User {
     }
 
     public static class UserBuilder {
-        private String id;
         private String username;
         private String displayName;
         private String email;
         private List<String> roles;
-
-        public UserBuilder id(String id) {
-            this.id = id;
-            return this;
-        }
 
         public UserBuilder username(String username) {
             this.username = username;
@@ -92,7 +96,6 @@ public class User {
 
         public User build() {
             User user = new User();
-            user.setId(id);
             user.setUsername(username);
             user.setDisplayName(displayName);
             user.setEmail(email);

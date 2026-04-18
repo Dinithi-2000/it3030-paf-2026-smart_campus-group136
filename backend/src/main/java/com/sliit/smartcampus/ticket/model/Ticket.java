@@ -1,47 +1,60 @@
 package com.sliit.smartcampus.ticket.model;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "tickets")
+@Entity
+@Table(name = "tickets")
 public class Ticket {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String resourceId;
     private String location;
     private String category;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Enumerated(EnumType.STRING)
     private TicketPriority priority;
+
     private String preferredContact;
 
+    @Enumerated(EnumType.STRING)
     private TicketStatus status;
+
     private String rejectionReason;
+
+    @Column(columnDefinition = "TEXT")
     private String resolutionNotes;
 
     private String createdByUserId;
     private String createdByName;
-
     private String assignedTechnicianId;
     private String assignedTechnicianName;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ticket_id")
     private List<TicketAttachment> attachments = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ticket_id")
     private List<TicketComment> comments = new ArrayList<>();
 
     private Instant createdAt;
     private Instant updatedAt;
     private Instant closedAt;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

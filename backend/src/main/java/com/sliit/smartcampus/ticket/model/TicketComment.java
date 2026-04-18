@@ -1,21 +1,33 @@
 package com.sliit.smartcampus.ticket.model;
 
+import jakarta.persistence.*;
 import java.time.Instant;
 
+@Entity
+@Table(name = "ticket_comments")
 public class TicketComment {
-    private String id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String authorId;
     private String authorName;
+
+    @Enumerated(EnumType.STRING)
     private ActorRole authorRole;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
+
     private Instant createdAt;
     private Instant updatedAt;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

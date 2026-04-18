@@ -1,17 +1,28 @@
 package com.sliit.smartcampus.ticket.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "ticket_attachments")
 public class TicketAttachment {
-    private String id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String fileName;
     private String contentType;
     private long size;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] data;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

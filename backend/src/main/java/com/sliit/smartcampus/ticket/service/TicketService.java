@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Service
 public class TicketService {
@@ -77,13 +76,13 @@ public class TicketService {
             .toList();
     }
 
-    public TicketResponse getTicket(String id, ActorContext actor) {
+    public TicketResponse getTicket(Long id, ActorContext actor) {
         Ticket ticket = fetchTicket(id);
         assertTicketVisible(ticket, actor);
         return toResponse(ticket);
     }
 
-    public TicketResponse assignTechnician(String ticketId, AssignTechnicianRequest request, ActorContext actor) {
+    public TicketResponse assignTechnician(Long ticketId, AssignTechnicianRequest request, ActorContext actor) {
         ensureRole(actor, ActorRole.ADMIN, "Only ADMIN can assign technicians");
 
         Ticket ticket = fetchTicket(ticketId);
@@ -102,7 +101,7 @@ public class TicketService {
         return toResponse(ticketRepository.save(ticket));
     }
 
-    public TicketResponse updateStatus(String ticketId, UpdateTicketStatusRequest request, ActorContext actor) {
+    public TicketResponse updateStatus(Long ticketId, UpdateTicketStatusRequest request, ActorContext actor) {
         Ticket ticket = fetchTicket(ticketId);
         ensureCanUpdateStatus(ticket, actor);
 
@@ -139,12 +138,11 @@ public class TicketService {
         return toResponse(ticketRepository.save(ticket));
     }
 
-    public TicketResponse addComment(String ticketId, CreateCommentRequest request, ActorContext actor) {
+    public TicketResponse addComment(Long ticketId, CreateCommentRequest request, ActorContext actor) {
         Ticket ticket = fetchTicket(ticketId);
         ensureCanComment(ticket, actor);
 
         TicketComment comment = new TicketComment();
-        comment.setId(UUID.randomUUID().toString());
         comment.setAuthorId(actor.userId());
         comment.setAuthorName(actor.displayName());
         comment.setAuthorRole(actor.role());
@@ -157,7 +155,7 @@ public class TicketService {
         return toResponse(ticketRepository.save(ticket));
     }
 
-    public TicketResponse updateComment(String ticketId, String commentId, UpdateCommentRequest request, ActorContext actor) {
+    public TicketResponse updateComment(Long ticketId, Long commentId, UpdateCommentRequest request, ActorContext actor) {
         Ticket ticket = fetchTicket(ticketId);
         TicketComment comment = findComment(ticket, commentId);
         ensureCanEditComment(comment, actor);
@@ -169,7 +167,7 @@ public class TicketService {
         return toResponse(ticketRepository.save(ticket));
     }
 
-    public void deleteComment(String ticketId, String commentId, ActorContext actor) {
+    public void deleteComment(Long ticketId, Long commentId, ActorContext actor) {
         Ticket ticket = fetchTicket(ticketId);
         TicketComment comment = findComment(ticket, commentId);
         ensureCanEditComment(comment, actor);
@@ -179,12 +177,12 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
-    private Ticket fetchTicket(String ticketId) {
+    private Ticket fetchTicket(Long ticketId) {
         return ticketRepository.findById(ticketId)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Ticket not found"));
     }
 
-    private TicketComment findComment(Ticket ticket, String commentId) {
+    private TicketComment findComment(Ticket ticket, Long commentId) {
         return ticket.getComments().stream()
             .filter(comment -> Objects.equals(comment.getId(), commentId))
             .findFirst()
@@ -285,7 +283,6 @@ public class TicketService {
 
             try {
                 TicketAttachment attachment = new TicketAttachment();
-                attachment.setId(UUID.randomUUID().toString());
                 attachment.setFileName(file.getOriginalFilename());
                 attachment.setContentType(contentType);
                 attachment.setSize(file.getSize());

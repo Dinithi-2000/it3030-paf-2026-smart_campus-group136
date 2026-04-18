@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 public class TicketResponse {
-    private String id;
+    private Long id;
     private String resourceId;
     private String location;
     private String category;
@@ -28,11 +28,11 @@ public class TicketResponse {
     private Instant updatedAt;
     private Instant closedAt;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -181,16 +181,16 @@ public class TicketResponse {
     }
 
     public static class AttachmentMetaResponse {
-        private String id;
+        private Long id;
         private String fileName;
         private String contentType;
         private long size;
 
-        public String getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(Long id) {
             this.id = id;
         }
 
@@ -220,7 +220,7 @@ public class TicketResponse {
     }
 
     public static class CommentResponse {
-        private String id;
+        private Long id;
         private String authorId;
         private String authorName;
         private ActorRole authorRole;
@@ -228,11 +228,11 @@ public class TicketResponse {
         private Instant createdAt;
         private Instant updatedAt;
 
-        public String getId() {
+        public Long getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(Long id) {
             this.id = id;
         }
 

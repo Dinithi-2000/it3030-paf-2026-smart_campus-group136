@@ -1,23 +1,31 @@
 package com.sliit.smartcampus.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import jakarta.persistence.*;
 import java.util.List;
 
-@Document(collection = "roles")
+@Entity
+@Table(name = "roles")
 public class Role {
+
     @Id
-    private String id;
-    private String name; // e.g., ADMIN, USER, TECHNICIAN, or custom
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String name;
+
     private String description;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"))
+    @Column(name = "permission")
     private List<String> permissions;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -50,15 +58,9 @@ public class Role {
     }
 
     public static class RoleBuilder {
-        private String id;
         private String name;
         private String description;
         private List<String> permissions;
-
-        public RoleBuilder id(String id) {
-            this.id = id;
-            return this;
-        }
 
         public RoleBuilder name(String name) {
             this.name = name;
@@ -77,7 +79,6 @@ public class Role {
 
         public Role build() {
             Role role = new Role();
-            role.setId(id);
             role.setName(name);
             role.setDescription(description);
             role.setPermissions(permissions);

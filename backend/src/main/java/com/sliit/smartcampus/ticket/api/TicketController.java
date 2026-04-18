@@ -64,14 +64,14 @@ public class TicketController {
     }
 
     @GetMapping("/{ticketId}")
-    public TicketResponse getTicket(@PathVariable String ticketId, HttpServletRequest servletRequest) {
+    public TicketResponse getTicket(@PathVariable Long ticketId, HttpServletRequest servletRequest) {
         ActorContext actor = actorContextResolver.resolve(servletRequest);
         return ticketService.getTicket(ticketId, actor);
     }
 
     @PutMapping("/{ticketId}/assignment")
     public TicketResponse assignTechnician(
-        @PathVariable String ticketId,
+        @PathVariable Long ticketId,
         @Valid @RequestBody AssignTechnicianRequest request,
         HttpServletRequest servletRequest
     ) {
@@ -81,7 +81,7 @@ public class TicketController {
 
     @PatchMapping("/{ticketId}/status")
     public TicketResponse updateStatus(
-        @PathVariable String ticketId,
+        @PathVariable Long ticketId,
         @Valid @RequestBody UpdateTicketStatusRequest request,
         HttpServletRequest servletRequest
     ) {
@@ -91,7 +91,7 @@ public class TicketController {
 
     @PostMapping("/{ticketId}/comments")
     public TicketResponse addComment(
-        @PathVariable String ticketId,
+        @PathVariable Long ticketId,
         @Valid @RequestBody CreateCommentRequest request,
         HttpServletRequest servletRequest
     ) {
@@ -101,8 +101,8 @@ public class TicketController {
 
     @PatchMapping("/{ticketId}/comments/{commentId}")
     public TicketResponse updateComment(
-        @PathVariable String ticketId,
-        @PathVariable String commentId,
+        @PathVariable Long ticketId,
+        @PathVariable Long commentId,
         @Valid @RequestBody UpdateCommentRequest request,
         HttpServletRequest servletRequest
     ) {
@@ -112,8 +112,8 @@ public class TicketController {
 
     @DeleteMapping("/{ticketId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
-        @PathVariable String ticketId,
-        @PathVariable String commentId,
+        @PathVariable Long ticketId,
+        @PathVariable Long commentId,
         HttpServletRequest servletRequest
     ) {
         ActorContext actor = actorContextResolver.resolve(servletRequest);

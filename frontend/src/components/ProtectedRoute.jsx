@@ -27,7 +27,9 @@ export function PublicRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={hasRole("ADMIN") ? "/admin-dashboard" : "/"} replace />;
+    if (hasRole("ADMIN"))      return <Navigate to="/admin-dashboard" replace />;
+    if (hasRole("TECHNICIAN")) return <Navigate to="/tech-dashboard"  replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

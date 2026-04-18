@@ -127,6 +127,32 @@ public class UserController {
         return "USER";
     }
 
+    @GetMapping
+    public ResponseEntity<?> listUsers(
+            @RequestParam(required = false) String role) {
+        try {
+            List<User> all = userRepository.findAll();
+            if (role != null && !role.isBlank()) {
+                String roleUpper = role.trim().toUpperCase();
+                all = all.stream()
+                        .filter(u -> u.getRoles() != null && u.getRoles().contains(roleUpper))
+                        .toList();
+            }
+            // Return safe projection (no passwords)
+            var result = all.stream().map(u -> Map.of(
+                    "id",          String.valueOf(u.getId()),
+                    "username",    u.getUsername() != null    ? u.getUsername()    : "",
+                    "displayName", u.getDisplayName() != null ? u.getDisplayName() : u.getUsername(),
+                    "email",       u.getEmail() != null       ? u.getEmail()       : "",
+                    "roles",       u.getRoles() != null       ? u.getRoles()       : List.of()
+            )).toList();
+            return ResponseEntity.ok(result);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "Could not fetch users: " + ex.getMessage()));
+        }
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {

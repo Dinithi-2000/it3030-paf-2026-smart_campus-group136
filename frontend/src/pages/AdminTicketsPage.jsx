@@ -5,6 +5,7 @@ import {
   addComment,
   assignTechnician,
   deleteComment,
+  fetchTechnicians,
   fetchTickets,
   updateComment,
   updateTicketStatus
@@ -69,6 +70,8 @@ function AdminTicketsPage() {
   const [priorityFilter, setPriorityFilter] = useState("ALL");
 
   const [assignment, setAssignment] = useState({ technicianId: "", technicianName: "" });
+  const [technicians, setTechnicians] = useState([]);
+  const [selectedTechId, setSelectedTechId] = useState("");   // dropdown selection
   const [nextStatus, setNextStatus] = useState("");
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
@@ -118,16 +121,24 @@ function AdminTicketsPage() {
 
   useEffect(() => { loadTickets(); }, []);
 
+  // Load technicians list once
+  useEffect(() => {
+    fetchTechnicians().then(setTechnicians).catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (!selectedTicket) {
       setAssignment({ technicianId: "", technicianName: "" });
+      setSelectedTechId("");
       setNextStatus(""); setResolutionNotes(""); setRejectionReason("");
       return;
     }
+    const currentId = selectedTicket.assignedTechnicianId || "";
     setAssignment({
-      technicianId: selectedTicket.assignedTechnicianId || "",
+      technicianId:   currentId,
       technicianName: selectedTicket.assignedTechnicianName || ""
     });
+    setSelectedTechId(currentId);
     setNextStatus(""); setResolutionNotes(selectedTicket.resolutionNotes || "");
     setRejectionReason(selectedTicket.rejectionReason || "");
   }, [selectedTicket?.id]);
@@ -136,15 +147,15 @@ function AdminTicketsPage() {
   const refresh = (updated) => setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
 
   const handleAssign = async () => {
-    if (!selectedTicket || !assignment.technicianId.trim() || !assignment.technicianName.trim()) {
-      setError("Technician ID and name are required."); return;
+    if (!selectedTicket || !assignment.technicianId.trim()) {
+      setError("Please select a technician."); return;
     }
     try {
       const updated = await assignTechnician(selectedTicket.id, {
-        technicianId: assignment.technicianId.trim(),
+        technicianId:   assignment.technicianId.trim(),
         technicianName: assignment.technicianName.trim()
       });
-      refresh(updated); setError(""); flash("Technician assigned successfully.");
+      refresh(updated); setError(""); flash(`Assigned to ${assignment.technicianName}`);
     } catch (err) { setError(err?.response?.data?.message || "Failed to assign technician"); }
   };
 
@@ -425,24 +436,80 @@ function AdminTicketsPage() {
                     {isAdmin && (
                       <div className="atk-section">
                         <h4>Technician Assignment</h4>
+
+                        {/* Current assignment status */}
                         <div className="atk-assigned-current">
                           {selectedTicket.assignedTechnicianName
-                            ? <span className="atk-assigned-chip">✓ {selectedTicket.assignedTechnicianName}</span>
-                            : <span className="atk-unassigned">Unassigned</span>}
+                            ? (
+                              <div className="atk-assigned-badge">
+                                <span className="atk-assigned-chip">✓ {selectedTicket.assignedTechnicianName}</span>
+                                <button
+                                  type="button"
+                                  className="ticket-btn-light atk-reassign-btn"
+                                  onClick={() => { setSelectedTechId(""); setAssignment({ technicianId:"", technicianName:"" }); }}
+                                >
+                                  Reassign
+                                </button>
+                              </div>
+                            )
+                            : <span className="atk-unassigned">⚠ Unassigned — select a technician below</span>}
                         </div>
+
+                        {/* Technician picker dropdown */}
                         <div className="atk-assign-form">
-                          <input
-                            value={assignment.technicianId}
-                            onChange={(e) => setAssignment((p) => ({ ...p, technicianId: e.target.value }))}
-                            placeholder="Technician ID"
-                          />
-                          <input
-                            value={assignment.technicianName}
-                            onChange={(e) => setAssignment((p) => ({ ...p, technicianName: e.target.value }))}
-                            placeholder="Technician Name"
-                          />
-                          <button type="button" className="ticket-btn-primary" onClick={handleAssign}>
-                            Assign
+                          <div className="atk-tech-select-wrap">
+                            <select
+                              className="atk-tech-select"
+                              value={selectedTechId}
+                              onChange={(e) => {
+                                const id  = e.target.value;
+                                const tech = technicians.find(t => (t.id ?? t.username) === id);
+                                setSelectedTechId(id);
+                                setAssignment({
+                                  technicianId:   id,
+                                  technicianName: tech ? (tech.displayName || tech.username) : ""
+                                });
+                              }}
+                            >
+                              <option value="">— Select technician —</option>
+                              {technicians.map((t) => {
+                                const techId = t.id ?? t.username;
+                                const name   = t.displayName || t.username;
+                                return (
+                                  <option key={techId} value={techId}>
+                                    {name} ({t.username})
+                                  </option>
+                                );
+                              })}
+                            </select>
+                            <svg className="atk-select-caret" viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="M7 10l5 5 5-5z" fill="currentColor"/>
+                            </svg>
+                          </div>
+
+                          {/* Show selected tech info card */}
+                          {selectedTechId && (() => {
+                            const tech = technicians.find(t => (t.id ?? t.username) === selectedTechId);
+                            return tech ? (
+                              <div className="atk-tech-preview">
+                                <div className="atk-tech-avatar">
+                                  {(tech.displayName || tech.username).charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <strong>{tech.displayName || tech.username}</strong>
+                                  <p>@{tech.username} · {tech.email || "No email"}</p>
+                                </div>
+                              </div>
+                            ) : null;
+                          })()}
+
+                          <button
+                            type="button"
+                            className="ticket-btn-primary"
+                            onClick={handleAssign}
+                            disabled={!selectedTechId}
+                          >
+                            {selectedTicket.assignedTechnicianName ? "Reassign Technician" : "Assign Technician"}
                           </button>
                         </div>
                       </div>

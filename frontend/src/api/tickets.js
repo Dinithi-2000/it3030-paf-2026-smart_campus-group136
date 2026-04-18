@@ -133,16 +133,14 @@ function mergeById(primary, secondary) {
 function filterUserTickets(tickets) {
   const { userId, role } = currentActor();
 
-  if (role === "ADMIN") {
+  // Admin and Technician see all tickets
+  if (role === "ADMIN" || role === "TECHNICIAN") {
     return [...tickets].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
+  // Regular users see only their own tickets
   return tickets
-    .filter(
-      (ticket) =>
-        ticket.createdByUserId === userId ||
-        (role === "TECHNICIAN" && ticket.assignedTechnicianId === userId)
-    )
+    .filter((ticket) => ticket.createdByUserId === userId)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
@@ -165,6 +163,26 @@ export async function fetchTickets(filters = {}) {
     return mergeById(serverTickets, localTickets).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } catch {
     return filterUserTickets(readMockTickets());
+  }
+}
+
+/** Fetch all users with TECHNICIAN role from the backend. */
+export async function fetchTechnicians() {
+  const SEED_TECHS = [
+    { id: "tech", username: "tech", displayName: "Tech User", email: "tech@smartcampus.local" }
+  ];
+  try {
+    const response = await client.get("/users", {
+      params: { role: "TECHNICIAN" },
+      headers: actorHeaders()
+    });
+    const data = response.data || [];
+    // Merge DB techs with seed tech (deduplicate by username)
+    const dbUsernames = new Set(data.map(u => u.username));
+    const extras = SEED_TECHS.filter(s => !dbUsernames.has(s.username));
+    return [...data, ...extras];
+  } catch {
+    return SEED_TECHS;
   }
 }
 

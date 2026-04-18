@@ -23,7 +23,11 @@ export function AuthProvider({ children }) {
       const data = await AuthService.login(username, password);
       const userData = data.user || { username: data.username };
       const userRoles = data.roles || ["USER"];
-      const redirectTo = userRoles.includes("ADMIN") ? "/admin-dashboard" : "/";
+      const redirectTo = userRoles.includes("ADMIN")
+        ? "/admin-dashboard"
+        : userRoles.includes("TECHNICIAN")
+        ? "/tech-dashboard"
+        : "/";
       
       setUser(userData);
       setRoles(userRoles);

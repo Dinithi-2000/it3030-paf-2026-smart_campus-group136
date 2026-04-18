@@ -89,8 +89,10 @@ function TicketsPage() {
   const [priorityFilter, setPriorityFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
+  const generateResourceId = () => `RES-${Date.now()}`;
+
   const [form, setForm] = useState({
-    resourceId: "",
+    resourceId: generateResourceId(),
     location: "",
     category: categoryOptions[0],
     description: "",
@@ -336,7 +338,14 @@ function TicketsPage() {
                 <button type="button" className="ticket-btn-light" onClick={handleExportReport}>
                   Export Report
                 </button>
-                <button type="button" className="ticket-btn-primary" onClick={() => setShowNewTicket((prev) => !prev)}>
+                <button
+                  type="button"
+                  className="ticket-btn-primary"
+                  onClick={() => {
+                    setForm((prev) => ({ ...prev, resourceId: generateResourceId() }));
+                    setShowNewTicket(true);
+                  }}
+                >
                   + New Ticket
                 </button>
               </div>
@@ -364,88 +373,99 @@ function TicketsPage() {
             </div>
 
             {showNewTicket ? (
-              <article className="ticket-panel ticket-ticket-create-inline">
-                <h2>Create New Ticket</h2>
-                <form className="ticket-form" onSubmit={handleCreateTicket}>
-                  <label>
-                    Resource ID
-                    <input
-                      value={form.resourceId}
-                      onChange={(event) => setForm((prev) => ({ ...prev, resourceId: event.target.value }))}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Location
-                    <input
-                      value={form.location}
-                      onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Category
-                    <select
-                      value={form.category}
-                      onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))}
+              <div className="ticket-modal-backdrop" onClick={() => setShowNewTicket(false)}>
+                <article className="ticket-modal-box" onClick={(e) => e.stopPropagation()}>
+                  <div className="ticket-modal-header">
+                    <h2>Create New Ticket</h2>
+                    <button
+                      type="button"
+                      className="ticket-modal-close"
+                      onClick={() => setShowNewTicket(false)}
+                      aria-label="Close"
                     >
-                      {categoryOptions.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Priority
-                    <select
-                      value={form.priority}
-                      onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
-                    >
-                      {priorityOptions.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Preferred Contact
-                    <input
-                      value={form.preferredContact}
-                      onChange={(event) => setForm((prev) => ({ ...prev, preferredContact: event.target.value }))}
-                      placeholder="Email or phone"
-                      required
-                    />
-                  </label>
-                  <label>
-                    Description
-                    <textarea
-                      rows="4"
-                      value={form.description}
-                      onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Evidence Images (max 3)
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(event) => setAttachments(Array.from(event.target.files || []).slice(0, 3))}
-                    />
-                  </label>
-                  <div className="ticket-attachment-list">
-                    {attachments.map((file) => (
-                      <span key={file.name}>{file.name}</span>
-                    ))}
+                      &times;
+                    </button>
                   </div>
-                  <button type="submit" className="ticket-btn-primary">
-                    Submit Ticket
-                  </button>
-                </form>
-              </article>
+                  <form className="ticket-form" onSubmit={handleCreateTicket}>
+                    <label>
+                      Location
+                      <input
+                        value={form.location}
+                        onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
+                        required
+                      />
+                    </label>
+                    <div className="ticket-form-grid">
+                      <label>
+                        Category
+                        <select
+                          value={form.category}
+                          onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))}
+                        >
+                          {categoryOptions.map((item) => (
+                            <option key={item} value={item}>
+                              {item}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        Priority
+                        <select
+                          value={form.priority}
+                          onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
+                        >
+                          {priorityOptions.map((item) => (
+                            <option key={item} value={item}>
+                              {item}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <label>
+                      Preferred Contact
+                      <input
+                        value={form.preferredContact}
+                        onChange={(event) => setForm((prev) => ({ ...prev, preferredContact: event.target.value }))}
+                        placeholder="Email or phone"
+                        required
+                      />
+                    </label>
+                    <label>
+                      Description
+                      <textarea
+                        rows="4"
+                        value={form.description}
+                        onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Evidence Images (max 3)
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(event) => setAttachments(Array.from(event.target.files || []).slice(0, 3))}
+                      />
+                    </label>
+                    <div className="ticket-attachment-list">
+                      {attachments.map((file) => (
+                        <span key={file.name}>{file.name}</span>
+                      ))}
+                    </div>
+                    <div className="ticket-modal-footer">
+                      <button type="button" className="ticket-btn-light" onClick={() => setShowNewTicket(false)}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="ticket-btn-primary">
+                        Submit Ticket
+                      </button>
+                    </div>
+                  </form>
+                </article>
+              </div>
             ) : null}
 
             <div className="ticket-main-layout">

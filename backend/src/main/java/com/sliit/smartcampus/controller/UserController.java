@@ -2,6 +2,11 @@ package com.sliit.smartcampus.controller;
 
 import com.sliit.smartcampus.model.User;
 import com.sliit.smartcampus.repository.UserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -19,6 +24,9 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepository;
+
+    @Value("${google.oauth.client-id:}")
+    private String googleClientId;
 
     public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -80,6 +88,58 @@ public class UserController {
                     ));
                 })
                 .orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
+    }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginDto dto) {
+        if (dto == null || dto.getIdToken() == null || dto.getIdToken().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "ID token is required"));
+        }
+
+        if (googleClientId == null || googleClientId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "Google client ID is not configured on the server."));
+        }
+
+        var payload = verifyGoogleIdToken(dto.getIdToken());
+        if (payload == null || payload.getEmail() == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid Google ID token"));
+        }
+
+        String email = payload.getEmail();
+        String username = email.contains("@") ? email.split("@")[0] : payload.getSubject();
+        String displayName = payload.get("name") != null ? payload.get("name").toString() : username;
+
+        var user = userRepository.findByEmail(email).orElseGet(() -> {
+            var newUser = User.builder()
+                    .username(username)
+                    .displayName(displayName)
+                    .email(email)
+                    .roles(List.of("USER"))
+                    .build();
+            return userRepository.save(newUser);
+        });
+
+        var roles = user.getRoles() == null || user.getRoles().isEmpty()
+                ? List.of("USER")
+                : user.getRoles();
+
+        return ResponseEntity.ok(Map.of(
+                "user", user,
+                "roles", roles
+        ));
+    }
+
+    private GoogleIdToken.Payload verifyGoogleIdToken(String idTokenString) {
+        try {
+            var verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+                    .setAudience(List.of(googleClientId))
+                    .build();
+            var idToken = verifier.verify(idTokenString);
+            return idToken != null ? idToken.getPayload() : null;
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     private List<String> resolveLoginRoles(User user, UserLoginDto dto) {
@@ -192,6 +252,18 @@ public class UserController {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+    }
+
+    public static class GoogleLoginDto {
+        public String idToken;
+
+        public String getIdToken() {
+            return idToken;
+        }
+
+        public void setIdToken(String idToken) {
+            this.idToken = idToken;
         }
     }
 

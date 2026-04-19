@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+                        .requestMatchers("/api/users/register", "/api/users/login", "/api/users/google-login").permitAll()
                         .requestMatchers("/api/users/me").authenticated()
                         .requestMatchers("/api/roles/**").authenticated()
                         .anyRequest().permitAll()

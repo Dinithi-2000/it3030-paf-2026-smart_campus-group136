@@ -18,6 +18,11 @@ const AuthService = {
     return response.data;
   },
 
+  googleLogin: async (idToken) => {
+    const response = await client.post("/users/google-login", { idToken });
+    return response.data;
+  },
+
   getCurrentUser: async () => {
     try {
       const response = await client.get("/users/me");

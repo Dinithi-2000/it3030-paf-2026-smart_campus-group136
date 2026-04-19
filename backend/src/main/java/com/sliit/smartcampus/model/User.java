@@ -19,6 +19,9 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column
+    private String password;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
@@ -64,6 +67,14 @@ public class User {
         this.roles = roles;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public static UserBuilder builder() {
         return new UserBuilder();
     }
@@ -72,6 +83,7 @@ public class User {
         private String username;
         private String displayName;
         private String email;
+        private String password;
         private List<String> roles;
 
         public UserBuilder username(String username) {
@@ -89,6 +101,11 @@ public class User {
             return this;
         }
 
+        public UserBuilder password(String password) {
+            this.password = password;
+            return this;
+        }
+
         public UserBuilder roles(List<String> roles) {
             this.roles = roles;
             return this;
@@ -99,6 +116,7 @@ public class User {
             user.setUsername(username);
             user.setDisplayName(displayName);
             user.setEmail(email);
+            user.setPassword(password);
             user.setRoles(roles);
             return user;
         }

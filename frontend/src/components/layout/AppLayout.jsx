@@ -6,8 +6,10 @@ function AppLayout({ children }) {
   const isDashboardRoute =
     location.pathname === "/" ||
     location.pathname === "/admin-dashboard" ||
-    location.pathname === "/user-tickets";
-  const showTopNav = !isDashboardRoute;
+    location.pathname === "/user-tickets" ||
+    location.pathname === "/my-bookings";
+  const hideTopNav = location.pathname === "/my-bookings";
+  const showTopNav = !isDashboardRoute && !hideTopNav;
 
   return (
     <div className={`page${isDashboardRoute ? " dashboard-page" : ""}`}>

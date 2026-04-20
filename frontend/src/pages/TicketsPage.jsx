@@ -88,6 +88,7 @@ function TicketsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [showStatusInfo, setShowStatusInfo] = useState(false);
 
   const generateResourceId = () => `RES-${Date.now()}`;
 
@@ -664,12 +665,47 @@ function TicketsPage() {
                       </div>
                     </section>
 
+                    {showStatusInfo && (
+                      <div className="ticket-status-info-box">
+                        <strong>Current Status: </strong>
+                        <span className={statusClass(selectedTicket.status)}>
+                          {selectedTicket.status.replaceAll("_", " ")}
+                        </span>
+                        <p>
+                          Status updates are handled by your assigned technician or admin.
+                          {selectedTicket.assignedTechnicianName
+                            ? ` Your technician is: ${selectedTicket.assignedTechnicianName}.`
+                            : " No technician has been assigned yet."}
+                        </p>
+                        <button
+                          type="button"
+                          className="ticket-btn-light"
+                          onClick={() => setShowStatusInfo(false)}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    )}
+
                     <div className="ticket-detail-actions">
-                      <button type="button" className="ticket-btn-light">
+                      <button
+                        type="button"
+                        className="ticket-btn-light"
+                        onClick={() => {
+                          setCommentDraft("");
+                          setEditingCommentId("");
+                          setEditingContent("");
+                          setShowStatusInfo(false);
+                        }}
+                      >
                         Discard Changes
                       </button>
-                      <button type="button" className="ticket-btn-primary">
-                        Update Status
+                      <button
+                        type="button"
+                        className="ticket-btn-primary"
+                        onClick={() => setShowStatusInfo((prev) => !prev)}
+                      >
+                        View Status Info
                       </button>
                     </div>
                   </>

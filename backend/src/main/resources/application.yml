@@ -20,6 +20,10 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+google:
+  oauth:
+    client-id: YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+
 logging:
   level:
     root: INFO

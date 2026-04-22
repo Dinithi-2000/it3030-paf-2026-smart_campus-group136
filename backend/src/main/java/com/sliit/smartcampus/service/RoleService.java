@@ -20,8 +20,9 @@ public class RoleService {
         return roleRepository.findAll();
     }
 
-    public Optional<Role> findById(String id) {
+  public Optional<Role> findById(String id) {
         return roleRepository.findById(Long.parseLong(id));
+    }
     }
 
     public Role create(Role role) {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./AuthPages.css";
@@ -9,7 +9,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,10 +29,76 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const handleGoogleSignIn = () => {
-    // Placeholder for OAuth 2.0 Google sign-in
-    setError("Google sign-in coming soon!");
+  const handleGoogleCredentialResponse = async (response) => {
+    setError("");
+    setLoading(true);
+
+    if (!response || !response.credential) {
+      setError("Google sign-in was cancelled or no account was selected.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const result = await googleLogin(response.credential);
+      if (result.success) {
+        navigate(result.redirectTo || "/");
+      } else {
+        setError(result.error || "Google sign-in failed");
+      }
+    } catch (error) {
+      setError(error.response?.data?.error || "Google sign-in failed");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleGoogleSignIn = () => {
+    setError("");
+
+    if (!GOOGLE_CLIENT_ID) {
+      setError("Google sign-in is not configured. Please set VITE_GOOGLE_CLIENT_ID.");
+      return;
+    }
+
+    if (!window.google?.accounts?.id) {
+      setError("Google sign-in library failed to load. Try refreshing the page.");
+      return;
+    }
+
+    window.google.accounts.id.prompt();
+  };
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) {
+      return;
+    }
+
+    if (document.getElementById("google-identity-script")) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "google-identity-script";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+      }
+    };
+
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [GOOGLE_CLIENT_ID]);
 
   return (
     <div className="auth-container split-layout">

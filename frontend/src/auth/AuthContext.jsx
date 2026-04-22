@@ -41,6 +41,27 @@ export function AuthProvider({ children }) {
     }
   };
 
+ const googleLogin = async (idToken) => {
+    try {
+      const data = await AuthService.googleLogin(idToken);
+      const userData = data.user || { username: data.username };
+      const userRoles = data.roles || ["USER"];
+      const redirectTo = userRoles.includes("ADMIN")
+        ? "/admin-dashboard"
+        : userRoles.includes("TECHNICIAN")
+        ? "/tech-dashboard"
+        : "/";
+      setUser(userData);
+      setRoles(userRoles);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("roles", JSON.stringify(userRoles));
+      localStorage.setItem("authToken", idToken);
+      return { success: true, user: userData, roles: userRoles, redirectTo };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || "Google sign-in failed" };
+    }
+  };
+
   const register = async (username, displayName, email, role = "USER", password) => {
     try {
       await AuthService.register(username, displayName, email, role, password);
@@ -69,12 +90,13 @@ export function AuthProvider({ children }) {
       roles,
       loading,
       login,
+      googleLogin,
       register,
       logout,
       hasRole,
       isAuthenticated: !!user
     }),
-    [user, roles, loading]
+    [user, roles, loading,login, googleLogin, register, logout, hasRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

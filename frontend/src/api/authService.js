@@ -8,12 +8,13 @@ const AuthService = {
     return response.data;
   },
 
-  register: async (username, displayName, email, role = "USER") => {
+  register: async (username, displayName, email, role = "USER", password) => {
     const response = await client.post("/users/register", {
       username,
       displayName,
       email,
-      role
+      role,
+      password
     });
     return response.data;
   },
@@ -30,6 +31,7 @@ const AuthService = {
   logout: () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
+    localStorage.removeItem("roles");
   }
 };
 

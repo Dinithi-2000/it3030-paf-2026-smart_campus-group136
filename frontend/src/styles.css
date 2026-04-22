@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
 
 :root {
@@ -1107,6 +1108,39 @@ code {
 .ticket-btn-danger {
   background: #ffe8ea;
   color: #b43e4d;
+}
+
+.ticket-status-info-box {
+  margin: 0 12px 0;
+  padding: 12px 14px;
+  background: #f0f6ff;
+  border: 1px solid #c5d8f5;
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.ticket-status-info-box strong {
+  font-size: 0.8rem;
+  color: #4a6280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ticket-status-info-box p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #2d445f;
+  line-height: 1.5;
+}
+
+.ticket-detail-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid #ebeff6;
 }
 
 .ticket-list-head {

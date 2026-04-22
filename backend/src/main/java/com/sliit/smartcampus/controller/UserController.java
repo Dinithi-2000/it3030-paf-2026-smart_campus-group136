@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -19,9 +20,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
@@ -29,6 +32,10 @@ public class UserController {
         try {
             if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
+            }
+
+            if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Password is required"));
             }
 
             String requestedRole = dto.getRole() == null ? "USER" : dto.getRole().trim().toUpperCase();
@@ -40,11 +47,12 @@ public class UserController {
                     .username(dto.getUsername())
                     .displayName(dto.getDisplayName())
                     .email(dto.getEmail())
+                        .password(passwordEncoder.encode(dto.getPassword()))
                     .roles(List.of(requestedRole))
                     .build();
 
             var saved = userRepository.save(user);
-            return ResponseEntity.created(URI.create("/api/users/" + saved.getId())).body(saved);
+                    return ResponseEntity.created(URI.create("/api/users/" + saved.getId())).body(toSafeUser(saved));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("error", "Registration service is unavailable. Please check database connection."));
@@ -57,25 +65,24 @@ public class UserController {
             return ResponseEntity.status(401).body(Map.of("error", "Username is required"));
         }
 
-        if (isSeededCredential(dto.getUsername(), dto.getPassword())) {
-            var seededUser = User.builder()
-                    .username(dto.getUsername())
-                    .displayName(dto.getUsername().toUpperCase())
-                    .email(dto.getUsername() + "@smartcampus.local")
-                    .roles(List.of(resolveSeededRole(dto.getUsername())))
-                    .build();
-
-            return ResponseEntity.ok(Map.of(
-                    "user", seededUser,
-                    "roles", seededUser.getRoles()
-            ));
-        }
-
         return userRepository.findByUsername(dto.getUsername())
                 .map(user -> {
+                    if (dto.getPassword() == null || dto.getPassword().isBlank()) {
+                        return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
+                    }
+
+                    if (user.getPassword() == null || user.getPassword().isBlank()) {
+                        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+                        userRepository.save(user);
+                    }
+
+                    if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
+                }
+
                     var roles = resolveLoginRoles(user, dto);
                     return ResponseEntity.ok(Map.of(
-                            "user", user,
+                    "user", toSafeUser(user),
                             "roles", roles
                     ));
                 })
@@ -87,44 +94,9 @@ public class UserController {
             return Collections.singletonList("USER");
         }
 
-        String username = dto != null ? dto.getUsername() : null;
-        String password = dto != null ? dto.getPassword() : null;
-        boolean isRequestedAdminCredential = username != null
-                && "Admin123".equalsIgnoreCase(username.trim())
-                && "Admin@123".equals(password);
-
-        if (isRequestedAdminCredential) {
-            return List.of("ADMIN");
-        }
-
         return user.getRoles() == null || user.getRoles().isEmpty()
                 ? Collections.singletonList("USER")
                 : user.getRoles();
-    }
-
-    private boolean isSeededCredential(String username, String password) {
-        if (username == null || password == null) {
-            return false;
-        }
-        String normalizedUsername = username.trim();
-        return ("admin".equalsIgnoreCase(normalizedUsername) && "adminpass".equals(password))
-                || ("user".equalsIgnoreCase(normalizedUsername) && "userpass".equals(password))
-                || ("tech".equalsIgnoreCase(normalizedUsername) && "techpass".equals(password))
-                || ("Admin123".equalsIgnoreCase(normalizedUsername) && "Admin@123".equals(password));
-    }
-
-    private String resolveSeededRole(String username) {
-        if (username == null) {
-            return "USER";
-        }
-
-        if ("admin".equalsIgnoreCase(username) || "Admin123".equalsIgnoreCase(username)) {
-            return "ADMIN";
-        }
-        if ("tech".equalsIgnoreCase(username)) {
-            return "TECHNICIAN";
-        }
-        return "USER";
     }
 
     @GetMapping
@@ -166,12 +138,22 @@ public class UserController {
                             .map(role -> role.replace("ROLE_", ""))
                             .toList();
                     return ResponseEntity.ok(Map.of(
-                            "user", user,
+                    "user", toSafeUser(user),
                             "roles", roles
                     ));
                 })
                 .orElse(ResponseEntity.status(401).body(Map.of("error", "User not found")));
     }
+
+        private Map<String, Object> toSafeUser(User user) {
+        return Map.of(
+            "id", user.getId(),
+            "username", user.getUsername(),
+            "displayName", user.getDisplayName() != null ? user.getDisplayName() : user.getUsername(),
+            "email", user.getEmail() != null ? user.getEmail() : "",
+            "roles", user.getRoles() != null ? user.getRoles() : List.of("USER")
+        );
+        }
 
     // DTOs
     public static class UserLoginDto {
@@ -200,6 +182,7 @@ public class UserController {
         public String displayName;
         public String email;
         public String role;
+        public String password;
 
         public String getUsername() {
             return username;
@@ -231,6 +214,14 @@ public class UserController {
 
         public void setRole(String role) {
             this.role = role;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 }

@@ -4,11 +4,14 @@ import { ProtectedRoute, PublicRoute } from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import AdminBookingDetailsPage from "./pages/AdminBookingDetailsPage";
+import BookingDetailsPage from "./pages/BookingDetailsPage";
 import AdminPage from "./pages/AdminPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminTicketsPage from "./pages/AdminTicketsPage";
-import BookingsPage from "./pages/BookingsPage";
+import CreateBookingPage from "./pages/CreateBookingPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
+import MyBookingsPage from "./pages/MyBookingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import RoleBasedDashboardPage from "./pages/RoleBasedDashboardPage";
 import RoleBasedTicketsPage from "./pages/RoleBasedTicketsPage";
@@ -29,7 +32,10 @@ function App() {
 
       {/* ── General protected routes (need AppLayout top-nav) ── */}
       <Route path="/facilities"    element={<ProtectedRoute><AppLayout><FacilitiesPage /></AppLayout></ProtectedRoute>} />
-      <Route path="/bookings"      element={<ProtectedRoute><AppLayout><BookingsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/create-booking" element={<ProtectedRoute><AppLayout><CreateBookingPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/my-bookings"   element={<ProtectedRoute><AppLayout><MyBookingsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/booking/:bookingId" element={<ProtectedRoute><AppLayout><BookingDetailsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/bookings"      element={<ProtectedRoute><Navigate to="/create-booking" replace /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><AppLayout><NotificationsPage /></AppLayout></ProtectedRoute>} />
 
       {/* ── Ticketing – self-contained full-shell pages ── */}
@@ -41,6 +47,7 @@ function App() {
       <Route path="/tech-dashboard" element={<ProtectedRoute><TechnicianDashboardPage /></ProtectedRoute>} />
 
       {/* ── Admin-only routes ── */}
+      <Route path="/admin-booking/:bookingId" element={<ProtectedRoute requiredRole="ADMIN"><AdminBookingDetailsPage /></ProtectedRoute>} />
       <Route path="/admin-tickets"   element={<ProtectedRoute requiredRole="ADMIN"><AdminTicketsPage /></ProtectedRoute>} />
       <Route path="/admin-dashboard" element={<ProtectedRoute requiredRole="ADMIN"><AdminDashboardPage /></ProtectedRoute>} />
       <Route path="/admin"           element={<ProtectedRoute requiredRole="ADMIN"><AppLayout><AdminPage /></AppLayout></ProtectedRoute>} />

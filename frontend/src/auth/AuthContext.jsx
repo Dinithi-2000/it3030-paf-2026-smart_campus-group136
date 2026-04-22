@@ -41,9 +41,9 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (username, displayName, email, role = "USER") => {
+  const register = async (username, displayName, email, role = "USER", password) => {
     try {
-      await AuthService.register(username, displayName, email, role);
+      await AuthService.register(username, displayName, email, role, password);
       return { success: true };
     } catch (error) {
       const message =

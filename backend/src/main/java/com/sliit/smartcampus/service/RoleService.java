@@ -21,7 +21,7 @@ public class RoleService {
     }
 
     public Optional<Role> findById(String id) {
-        return roleRepository.findById(id);
+        return roleRepository.findById(Long.parseLong(id));
     }
 
     public Role create(Role role) {
@@ -29,7 +29,7 @@ public class RoleService {
     }
 
     public Optional<Role> update(String id, Role update) {
-        return roleRepository.findById(id).map(existing -> {
+        return roleRepository.findById(Long.parseLong(id)).map(existing -> {
             existing.setName(update.getName());
             existing.setDescription(update.getDescription());
             existing.setPermissions(update.getPermissions());
@@ -38,6 +38,6 @@ public class RoleService {
     }
 
     public void delete(String id) {
-        roleRepository.deleteById(id);
+        roleRepository.deleteById(Long.parseLong(id));
     }
 }

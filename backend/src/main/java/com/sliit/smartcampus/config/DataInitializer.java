@@ -13,10 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.time.Instant;
 import java.time.LocalTime;
+import java.util.Optional;
 
 @Configuration
 public class DataInitializer {
@@ -24,7 +26,8 @@ public class DataInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializer.class);
 
     @Bean
-    CommandLineRunner init(RoleRepository roleRepository, UserRepository userRepository, FacilityRepository facilityRepository) {
+
+    CommandLineRunner init(RoleRepository roleRepository, UserRepository userRepository, FacilityRepository facilityRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             try {
                 if (roleRepository.count() == 0) {
@@ -116,9 +119,65 @@ public class DataInitializer {
 
                     facilityRepository.saveAll(List.of(lab, hall, equipment));
                 }
+                ensureSeedUser(userRepository, passwordEncoder,
+                        "admin", "Administrator", "admin@smartcampus.local", "adminpass", List.of("ADMIN"));
+                ensureSeedUser(userRepository, passwordEncoder,
+                        "user", "Campus User", "user@smartcampus.local", "userpass", List.of("USER"));
+                ensureSeedUser(userRepository, passwordEncoder,
+                        "tech", "Tech Support", "tech@smartcampus.local", "techpass", List.of("TECHNICIAN"));
+                ensureSeedUser(userRepository, passwordEncoder,
+                        "Admin123", "Admin123", "admin123@smartcampus.local", "Admin@123", List.of("ADMIN"));
             } catch (Exception ex) {
                 LOGGER.warn("Skipping data seeding because database is unavailable: {}", ex.getMessage());
             }
         };
+    }
+
+    private void ensureSeedUser(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            String username,
+            String displayName,
+            String email,
+            String rawPassword,
+            List<String> roles
+    ) {
+        Optional<User> maybeExisting = userRepository.findByUsername(username);
+        if (maybeExisting.isPresent()) {
+            User existing = maybeExisting.get();
+            boolean needsSave = false;
+
+            if (existing.getPassword() == null || existing.getPassword().isBlank()) {
+                existing.setPassword(passwordEncoder.encode(rawPassword));
+                needsSave = true;
+            }
+            if (existing.getRoles() == null || existing.getRoles().isEmpty()) {
+                existing.setRoles(roles);
+                needsSave = true;
+            }
+            if (existing.getDisplayName() == null || existing.getDisplayName().isBlank()) {
+                existing.setDisplayName(displayName);
+                needsSave = true;
+            }
+            if (existing.getEmail() == null || existing.getEmail().isBlank()) {
+                existing.setEmail(email);
+                needsSave = true;
+            }
+
+            if (needsSave) {
+                userRepository.save(existing);
+            }
+            return;
+        }
+
+        User seeded = User.builder()
+                .username(username)
+                .displayName(displayName)
+                .email(email)
+                .password(passwordEncoder.encode(rawPassword))
+                .roles(roles)
+                .build();
+
+        userRepository.save(seeded);
     }
 }

@@ -23,8 +23,8 @@ const navItems = [
     icon: "M12 3 3 8l9 5 9-5-9-5Zm-7.5 8.8V16L12 21l7.5-5v-4.2L12 16l-7.5-4.2Z"
   },
   {
-    label: "Bookings",
-    to: "/bookings",
+    label: "My Bookings",
+    to: "/my-bookings",
     icon: "M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10Z"
   },
   {

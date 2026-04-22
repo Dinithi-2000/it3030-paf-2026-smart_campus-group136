@@ -9,4 +9,14 @@ const client = axios.create({
   timeout: 10000
 });
 
+client.interceptors.request.use((config) => {
+  const authToken = localStorage.getItem("authToken");
+  if (authToken) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Basic ${authToken}`;
+  }
+
+  return config;
+});
+
 export default client;

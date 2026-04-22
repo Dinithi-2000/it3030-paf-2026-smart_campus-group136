@@ -5,7 +5,7 @@ import "./TopNav.css";
 const navItems = [
   { to: "/", label: "Dashboard" },
   { to: "/facilities", label: "Facilities" },
-  { to: "/bookings", label: "Bookings" },
+  { to: "/my-bookings", label: "My Bookings" },
   { to: "/notifications", label: "Notifications" },
   { to: "/admin", label: "Analytics" }
 ];

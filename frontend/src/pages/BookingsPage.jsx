@@ -113,6 +113,34 @@ function bookingStatusClass(status) {
   return `status-pill booking-status booking-status-${normalized.toLowerCase()}`;
 }
 
+function bookingStatusTone(status) {
+  const normalized = String(status || "PENDING").toUpperCase();
+  const tones = {
+    PENDING: {
+      badge: "bg-amber-100 text-amber-800",
+      dot: "bg-amber-500",
+      border: "border-l-4 border-amber-500"
+    },
+    APPROVED: {
+      badge: "bg-green-100 text-green-800",
+      dot: "bg-green-500",
+      border: "border-l-4 border-green-500"
+    },
+    REJECTED: {
+      badge: "bg-red-100 text-red-800",
+      dot: "bg-red-500",
+      border: "border-l-4 border-red-500"
+    },
+    CANCELLED: {
+      badge: "bg-gray-200 text-gray-700",
+      dot: "bg-gray-500",
+      border: "border-l-4 border-gray-400"
+    }
+  };
+
+  return tones[normalized] || tones.PENDING;
+}
+
 function BookingsPage({ mode = "my" }) {
   const { user, roles, logout } = useAuth();
   const navigate = useNavigate();
@@ -224,6 +252,8 @@ function BookingsPage({ mode = "my" }) {
   const visibleCount = visibleBookings.length;
   const pendingCount = bookings.filter((booking) => booking.status === "PENDING").length;
   const approvedCount = bookings.filter((booking) => booking.status === "APPROVED").length;
+  const cancelledCount = bookings.filter((booking) => booking.status === "CANCELLED").length;
+  const isStudentBookingsView = !isAdmin && isMyView && !showCreatePanel;
 
   const handleFieldChange = (event) => {
     const { name, value } = event.target;
@@ -444,51 +474,91 @@ function BookingsPage({ mode = "my" }) {
           </div>
         </header>
 
-        <section className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""}`}>
-          <header className="ops-panel booking-hero" ref={formRef}>
-        <div className="booking-hero-copy">
-          <p className="eyebrow">Module B</p>
-          <h1>
-            {isCreateView
-              ? "Create Booking Workspace"
-              : isAdminReviewView
-              ? "All Bookings Command View"
-              : "My Bookings Workspace"}
-          </h1>
-          <p className="booking-hero-text">
-            {isCreateView
-              ? "Create new booking requests with conflict checks and operational guardrails."
-              : isAdminReviewView
-              ? "Review all reservation traffic, inspect requests, and process approvals from one consolidated admin view."
-              : "Track status updates and manage your submitted booking requests from your personal bookings workspace."}
-          </p>
+        <section className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""} ${isStudentBookingsView ? "min-h-screen rounded-3xl bg-slate-50 p-4 md:p-6" : ""}`}>
+          {isStudentBookingsView ? (
+            <header ref={formRef} className="mb-6 space-y-4">
+              <div className="rounded-2xl bg-linear-to-r from-violet-300 to-purple-300 p-6 shadow-md">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-50">Bookings</p>
+                    <h1 className="mt-1 text-2xl font-semibold text-white md:text-3xl">My Bookings</h1>
+                    <p className="mt-2 text-sm text-violet-50 md:text-base">Manage your facility and resource reservations</p>
+                  </div>
+                  <span className="inline-flex w-fit items-center rounded-full bg-white/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white ring-1 ring-white/40">
+                    {roleLabel}
+                  </span>
+                </div>
+              </div>
 
-          <div className="booking-chip-row">
-            <span className="booking-chip booking-chip-strong">Role: {roleLabel}</span>
-            <span className="booking-chip">Visible bookings: {visibleCount}</span>
-            <span className="booking-chip">Pending: {pendingCount}</span>
-            <span className="booking-chip">Approved: {approvedCount}</span>
-          </div>
-        </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                  <div className="mb-2 h-2 w-8 rounded-full bg-violet-300" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Bookings</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-800">{visibleCount}</p>
+                </div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                  <div className="mb-2 h-2 w-8 rounded-full bg-amber-500" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Pending</p>
+                  <p className="mt-1 text-2xl font-bold text-amber-600">{pendingCount}</p>
+                </div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                  <div className="mb-2 h-2 w-8 rounded-full bg-green-500" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Approved</p>
+                  <p className="mt-1 text-2xl font-bold text-green-600">{approvedCount}</p>
+                </div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                  <div className="mb-2 h-2 w-8 rounded-full bg-slate-500" />
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cancelled</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-600">{cancelledCount}</p>
+                </div>
+              </div>
+            </header>
+          ) : (
+            <header className="ops-panel booking-hero" ref={formRef}>
+              <div className="booking-hero-copy">
+                <p className="eyebrow">Module B</p>
+                <h1>
+                  {isCreateView
+                    ? "Create Booking Workspace"
+                    : isAdminReviewView
+                    ? "All Bookings Command View"
+                    : "My Bookings Workspace"}
+                </h1>
+                <p className="booking-hero-text">
+                  {isCreateView
+                    ? "Create new booking requests with conflict checks and operational guardrails."
+                    : isAdminReviewView
+                    ? "Review all reservation traffic, inspect requests, and process approvals from one consolidated admin view."
+                    : "Track status updates and manage your submitted booking requests from your personal bookings workspace."}
+                </p>
 
-        <div className="booking-hero-stats">
-          <div className="booking-stat-card">
-            <span className="booking-stat-label">Conflict preview</span>
-            <strong>{draftConflicts.length}</strong>
-            <span className="booking-stat-note">Approved overlaps detected in the current schedule snapshot</span>
-          </div>
-          <div className="booking-stat-card">
-            <span className="booking-stat-label">Request status</span>
-            <strong>Live</strong>
-            <span className="booking-stat-note">Server-side validation still runs on submit</span>
-          </div>
-        </div>
-      </header>
+                <div className="booking-chip-row">
+                  <span className="booking-chip booking-chip-strong">Role: {roleLabel}</span>
+                  <span className="booking-chip">Visible bookings: {visibleCount}</span>
+                  <span className="booking-chip">Pending: {pendingCount}</span>
+                  <span className="booking-chip">Approved: {approvedCount}</span>
+                </div>
+              </div>
+
+              <div className="booking-hero-stats">
+                <div className="booking-stat-card">
+                  <span className="booking-stat-label">Conflict preview</span>
+                  <strong>{draftConflicts.length}</strong>
+                  <span className="booking-stat-note">Approved overlaps detected in the current schedule snapshot</span>
+                </div>
+                <div className="booking-stat-card">
+                  <span className="booking-stat-label">Request status</span>
+                  <strong>Live</strong>
+                  <span className="booking-stat-note">Server-side validation still runs on submit</span>
+                </div>
+              </div>
+            </header>
+          )}
 
       {error ? <div className="booking-alert booking-alert-error">{error}</div> : null}
       {success ? <div className="booking-alert booking-alert-success">{success}</div> : null}
 
-      <div className={`booking-grid${useSingleColumnGrid ? " booking-grid-single" : ""}`}>
+      <div className={`booking-grid${useSingleColumnGrid || isStudentBookingsView ? " booking-grid-single" : ""}`}>
         {showCreatePanel ? (
           <article className="ops-panel booking-card booking-form-panel">
             <div className="ops-panel-head">
@@ -636,27 +706,44 @@ function BookingsPage({ mode = "my" }) {
         ) : null}
 
         {!isCreateView ? (
-        <article className={`ops-panel booking-card booking-list-panel${isAdminReviewView ? " booking-list-panel-admin" : ""}`}>
+        <article className={`ops-panel booking-card booking-list-panel${isAdminReviewView ? " booking-list-panel-admin" : ""} ${isStudentBookingsView ? "rounded-2xl border border-slate-200 bg-white p-4 shadow-md md:p-6" : ""}`}>
           <div className="ops-panel-head">
-            <h2>{isAdminReviewView ? "All Bookings" : "My Bookings"}</h2>
-            <button type="button" onClick={loadBookings} disabled={loading}>
+            <h2 className={isStudentBookingsView ? "text-xl font-semibold text-slate-800" : ""}>{isAdminReviewView ? "All Bookings" : "My Bookings"}</h2>
+            <button
+              type="button"
+              onClick={loadBookings}
+              disabled={loading}
+              className={
+                isStudentBookingsView
+                  ? "rounded-xl border border-violet-200 px-4 py-2 text-sm font-medium text-violet-600 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  : ""
+              }
+            >
               Reload
             </button>
           </div>
 
-          <div className="booking-filter-bar">
+          <div className={isStudentBookingsView ? "mb-4 flex flex-col gap-3 rounded-2xl bg-slate-100 p-4 md:flex-row md:items-center" : "booking-filter-bar"}>
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="booking-input"
+              className={
+                isStudentBookingsView
+                  ? "w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none ring-0 transition focus:border-violet-300 focus:ring-2 focus:ring-violet-100 md:flex-2"
+                  : "booking-input"
+              }
               placeholder="Search by resource, user, purpose, or status"
             />
 
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="booking-select"
+              className={
+                isStudentBookingsView
+                  ? "w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-violet-300 focus:ring-2 focus:ring-violet-100 md:flex-1"
+                  : "booking-select"
+              }
             >
               <option value="ALL">All statuses</option>
               {Object.keys(STATUS_LABELS).map((status) => (
@@ -670,9 +757,24 @@ function BookingsPage({ mode = "my" }) {
               type="text"
               value={resourceFilter}
               onChange={(event) => setResourceFilter(event.target.value)}
-              className="booking-input"
+              className={
+                isStudentBookingsView
+                  ? "w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-violet-300 focus:ring-2 focus:ring-violet-100 md:flex-1"
+                  : "booking-input"
+              }
               placeholder="Filter by resource"
             />
+
+            {isStudentBookingsView ? (
+              <button
+                type="button"
+                onClick={loadBookings}
+                disabled={loading}
+                className="w-full rounded-xl bg-violet-300 px-4 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
+              >
+                Filter
+              </button>
+            ) : null}
           </div>
 
           {loading ? (
@@ -681,22 +783,44 @@ function BookingsPage({ mode = "my" }) {
               <p>Loading bookings...</p>
             </div>
           ) : visibleBookings.length === 0 ? (
-            <div className="booking-empty">
-              <p className="booking-empty-title">No bookings found</p>
-              <p className="booking-empty-text">Try changing the filters or create a new booking request.</p>
-            </div>
+            isStudentBookingsView ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+                <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-violet-100 text-violet-500">
+                  <svg viewBox="0 0 24 24" className="h-8 w-8" aria-hidden="true">
+                    <path
+                      d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v13a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2h3V2Zm13 8H4v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+                <p className="text-lg font-semibold text-slate-800">No bookings yet</p>
+                <p className="mt-2 text-sm text-slate-500">Your booking requests will appear here</p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/create-booking")}
+                  className="mt-5 rounded-xl bg-violet-300 px-5 py-2.5 text-sm font-semibold text-violet-900 transition hover:bg-violet-400"
+                >
+                  Make a Booking
+                </button>
+              </div>
+            ) : (
+              <div className="booking-empty">
+                <p className="booking-empty-title">No bookings found</p>
+                <p className="booking-empty-text">Try changing the filters or create a new booking request.</p>
+              </div>
+            )
           ) : (
-            <div className="ops-table-wrap">
-              <table className={`booking-table${isAdminReviewView ? " booking-table-admin" : ""}`}>
+            <div className={isStudentBookingsView ? "overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm" : "ops-table-wrap"}>
+              <table className={`${isStudentBookingsView ? "min-w-195 w-full border-separate border-spacing-0" : `booking-table${isAdminReviewView ? " booking-table-admin" : ""}`}`}>
                 <thead>
                   <tr>
-                    <th>Resource</th>
-                    <th>Purpose</th>
-                    {isAdminReviewView ? <th>Time</th> : <th>Date</th>}
-                    {!isAdminReviewView ? <th>Time</th> : null}
-                    {isAdminReviewView ? <th>User</th> : null}
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Resource</th>
+                    <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Purpose</th>
+                    {isAdminReviewView ? <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Time</th> : <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Date</th>}
+                    {!isAdminReviewView ? <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Time</th> : null}
+                    {isAdminReviewView ? <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>User</th> : null}
+                    <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Status</th>
+                    <th className={isStudentBookingsView ? "bg-violet-600 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white" : ""}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -704,31 +828,53 @@ function BookingsPage({ mode = "my" }) {
                     const canCancel = !isAdmin && booking.userId === currentUserId && booking.status === "APPROVED";
                     const canApprove = isAdminReviewView && booking.status === "PENDING";
                     const canDelete = isAdminReviewView;
+                    const statusTone = bookingStatusTone(booking.status);
 
                     return (
                       <tr
                         key={booking.id}
-                        className="booking-row"
+                        className={
+                          isStudentBookingsView
+                            ? `${statusTone.border} ${booking.id % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-violet-50`
+                            : "booking-row"
+                        }
                       >
-                        <td>
+                        <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>
                           <strong>{booking.resourceId}</strong>
                         </td>
-                        <td>
-                          <div className="booking-purpose-cell">
+                        <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>
+                          <div className={isStudentBookingsView ? "flex flex-col gap-1" : "booking-purpose-cell"}>
                             <strong>{booking.purpose}</strong>
-                            <span>{booking.expectedAttendees ?? "-"} attendees</span>
-                            {booking.rejectionReason ? <span>Reason: {booking.rejectionReason}</span> : null}
+                            <span className={isStudentBookingsView ? "text-xs text-slate-500" : ""}>{booking.expectedAttendees ?? "-"} attendees</span>
+                            {booking.rejectionReason ? <span className={isStudentBookingsView ? "text-xs text-red-600" : ""}>Reason: {booking.rejectionReason}</span> : null}
                           </div>
                         </td>
-                        {isAdminReviewView ? <td>{formatTimeRange(booking.startTime, booking.endTime)}</td> : <td>{formatDateOnly(booking.startTime)}</td>}
-                        {!isAdminReviewView ? <td>{formatTimeWindow(booking.startTime, booking.endTime)}</td> : null}
-                        {isAdminReviewView ? <td>{booking.userId}</td> : null}
-                        <td>
-                          <span className={bookingStatusClass(booking.status)}>{STATUS_LABELS[booking.status] || booking.status}</span>
+                        {isAdminReviewView ? <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>{formatTimeRange(booking.startTime, booking.endTime)}</td> : <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>{formatDateOnly(booking.startTime)}</td>}
+                        {!isAdminReviewView ? <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>{formatTimeWindow(booking.startTime, booking.endTime)}</td> : null}
+                        {isAdminReviewView ? <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>{booking.userId}</td> : null}
+                        <td className={isStudentBookingsView ? "px-4 py-3" : ""}>
+                          <span
+                            className={
+                              isStudentBookingsView
+                                ? `inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${statusTone.badge}`
+                                : bookingStatusClass(booking.status)
+                            }
+                          >
+                            {isStudentBookingsView ? <span className={`h-1.5 w-1.5 rounded-full ${statusTone.dot}`} /> : null}
+                            {STATUS_LABELS[booking.status] || booking.status}
+                          </span>
                         </td>
-                        <td onClick={(event) => event.stopPropagation()}>
-                          <div className={`booking-table-actions${isAdminReviewView ? " booking-table-actions-admin" : ""}`}>
-                            <button type="button" className="booking-ghost-btn" onClick={() => handleViewBooking(booking.id)}>
+                        <td className={isStudentBookingsView ? "px-4 py-3" : ""} onClick={(event) => event.stopPropagation()}>
+                          <div className={isStudentBookingsView ? "flex flex-wrap items-center gap-2" : `booking-table-actions${isAdminReviewView ? " booking-table-actions-admin" : ""}`}>
+                            <button
+                              type="button"
+                              className={
+                                isStudentBookingsView
+                                  ? "rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-300 hover:text-violet-900"
+                                  : "booking-ghost-btn"
+                              }
+                              onClick={() => handleViewBooking(booking.id)}
+                            >
                               View
                             </button>
                             {canApprove ? (
@@ -754,7 +900,11 @@ function BookingsPage({ mode = "my" }) {
                             {canCancel ? (
                               <button
                                 type="button"
-                                className="booking-warn-btn"
+                                className={
+                                  isStudentBookingsView
+                                    ? "rounded-lg border border-red-500 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-500 hover:text-white"
+                                    : "booking-warn-btn"
+                                }
                                 disabled={busyBookingId === booking.id}
                                 onClick={() => handleCancel(booking.id)}
                               >

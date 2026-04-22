@@ -117,13 +117,23 @@ function BookingsPage({ mode = "my" }) {
   const { user, roles, logout } = useAuth();
   const navigate = useNavigate();
   const isAdmin = roles?.includes("ADMIN");
-  const isMyView = mode === "my";
+  const isMyView = mode === "my" || mode === "student-my";
   const isAdminView = isAdmin && mode === "admin-all";
-  const isCreateView = isAdmin && mode === "create";
+  const isCreateView = (isAdmin && mode === "create") || (!isAdmin && mode === "student-create");
   const isAdminReviewView = isAdminView || (isAdmin && isMyView);
-  const showCreatePanel = isCreateView || (isMyView && !isAdmin);
+  const isLegacyStudentMyView = !isAdmin && mode === "my";
+  const showCreatePanel = isCreateView || isLegacyStudentMyView;
   const useSingleColumnGrid = showCreatePanel || isAdminReviewView;
-  const navItems = baseNavItems;
+  const navItems = !isAdmin
+    ? baseNavItems.flatMap((item) =>
+        item.to === "/my-bookings"
+          ? [
+              { label: "Create Booking", to: "/create-booking", icon: "create" },
+              { label: "My Bookings", to: "/my-bookings", icon: "booking" }
+            ]
+          : [item]
+      )
+    : baseNavItems;
   const currentUserId = user?.id || user?.username || "";
   const roleLabel = isAdmin
     ? "Admin"
@@ -450,7 +460,7 @@ function BookingsPage({ mode = "my" }) {
               ? "Create new booking requests with conflict checks and operational guardrails."
               : isAdminReviewView
               ? "Review all reservation traffic, inspect requests, and process approvals from one consolidated admin view."
-              : "Create new booking requests and track status updates from your personal bookings workspace."}
+              : "Track status updates and manage your submitted booking requests from your personal bookings workspace."}
           </p>
 
           <div className="booking-chip-row">

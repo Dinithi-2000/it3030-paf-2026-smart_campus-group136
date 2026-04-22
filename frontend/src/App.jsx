@@ -9,6 +9,7 @@ import BookingDetailsPage from "./pages/BookingDetailsPage";
 import AdminPage from "./pages/AdminPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminTicketsPage from "./pages/AdminTicketsPage";
+import CreateBookingPage from "./pages/CreateBookingPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -31,9 +32,10 @@ function App() {
 
       {/* ── General protected routes (need AppLayout top-nav) ── */}
       <Route path="/facilities"    element={<ProtectedRoute><AppLayout><FacilitiesPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/create-booking" element={<ProtectedRoute><AppLayout><CreateBookingPage /></AppLayout></ProtectedRoute>} />
       <Route path="/my-bookings"   element={<ProtectedRoute><AppLayout><MyBookingsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/booking/:bookingId" element={<ProtectedRoute><AppLayout><BookingDetailsPage /></AppLayout></ProtectedRoute>} />
-      <Route path="/bookings"      element={<ProtectedRoute><Navigate to="/my-bookings" replace /></ProtectedRoute>} />
+      <Route path="/bookings"      element={<ProtectedRoute><Navigate to="/create-booking" replace /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><AppLayout><NotificationsPage /></AppLayout></ProtectedRoute>} />
 
       {/* ── Ticketing – self-contained full-shell pages ── */}

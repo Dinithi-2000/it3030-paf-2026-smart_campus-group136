@@ -738,6 +738,12 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.booking-modal-actions {
+  margin-top: 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 
 .booking-detail-actions {
   align-content: flex-start;

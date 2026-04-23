@@ -64,10 +64,10 @@ public class BookingController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBooking(@PathVariable Long id) {
-        bookingService.deleteBooking(id);
+    public void deleteBooking(@PathVariable Long id, Authentication authentication) {
+        bookingService.deleteBooking(id, requireUserId(authentication), resolveRole(authentication));
     }
 
     private String resolveRole(Authentication authentication) {

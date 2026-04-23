@@ -118,10 +118,29 @@ public class BookingService {
         return mapToResponse(bookingRepository.save(booking));
     }
 
-    public void deleteBooking(Long bookingId) {
+    public void deleteBooking(Long bookingId, String currentUserId, String currentUserRole) {
         Booking booking = bookingRepository.findById(bookingId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-        bookingRepository.delete(booking);
+
+        String normalizedRole = currentUserRole == null ? "" : currentUserRole.trim().toUpperCase();
+        if ("ADMIN".equals(normalizedRole)) {
+            bookingRepository.delete(booking);
+            return;
+        }
+
+        if ("USER".equals(normalizedRole)) {
+            if (!currentUserId.equals(booking.getUserId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed");
+            }
+            if (booking.getStatus() == BookingStatus.APPROVED) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Approved bookings cannot be deleted. Cancel it instead.");
+            }
+
+            bookingRepository.delete(booking);
+            return;
+        }
+
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed");
     }
 
     private BookingResponseDTO mapToResponse(Booking booking) {

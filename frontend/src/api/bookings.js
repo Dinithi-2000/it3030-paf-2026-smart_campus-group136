@@ -304,16 +304,26 @@ export async function deleteBooking(bookingId) {
   return requestWithFallback(
     () => client.delete(`/bookings/${bookingId}`),
     () => {
-      const { role } = currentActor();
-      if (role !== "ADMIN") {
+      const { role, userId } = currentActor();
+
+      const bookings = readMockBookings();
+      const booking = bookings.find((item) => String(item.id) === String(bookingId));
+      if (!booking) {
+        throw createHttpError(404, "Booking not found");
+      }
+
+      if (role === "USER") {
+        if (booking.userId !== userId) {
+          throw createHttpError(403, "Not allowed");
+        }
+        if (booking.status === "APPROVED") {
+          throw createHttpError(403, "Approved bookings cannot be deleted. Cancel it instead.");
+        }
+      } else if (role !== "ADMIN") {
         throw createHttpError(403, "Not allowed");
       }
 
-      const bookings = readMockBookings();
-      const nextBookings = bookings.filter((booking) => String(booking.id) !== String(bookingId));
-      if (nextBookings.length === bookings.length) {
-        throw createHttpError(404, "Booking not found");
-      }
+      const nextBookings = bookings.filter((item) => String(item.id) !== String(bookingId));
 
       writeMockBookings(nextBookings);
       return { data: null };

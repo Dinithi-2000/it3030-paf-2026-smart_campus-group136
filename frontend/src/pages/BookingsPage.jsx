@@ -414,6 +414,20 @@ function BookingsPage({ mode = "my" }) {
     }
   };
 
+  const handleDeleteFromModal = async () => {
+    if (!selectedBooking) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete booking ${selectedBooking.id}? This action cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    await handleDelete(selectedBooking.id);
+    setSelectedBooking(null);
+  };
+
   const handleQuickReject = async (booking) => {
     const reason = window.prompt(`Enter a rejection reason for booking ${booking.id}:`, booking.rejectionReason || "");
     if (reason === null) {
@@ -869,7 +883,6 @@ function BookingsPage({ mode = "my" }) {
                   {visibleBookings.map((booking) => {
                     const canCancel = !isAdmin && booking.userId === currentUserId && booking.status === "APPROVED";
                     const canApprove = isAdminReviewView && booking.status === "PENDING";
-                    const canDelete = isAdminReviewView;
                     const statusTone = bookingStatusTone(booking.status);
                     const isNewBooking = isAdminReviewView && isRecentlyCreatedBooking(booking);
 
@@ -957,16 +970,6 @@ function BookingsPage({ mode = "my" }) {
                                 Cancel
                               </button>
                             ) : null}
-                            {canDelete ? (
-                              <button
-                                type="button"
-                                className="booking-danger-btn"
-                                disabled={busyBookingId === booking.id}
-                                onClick={() => handleDelete(booking.id)}
-                              >
-                                Delete
-                              </button>
-                            ) : null}
                           </div>
                         </td>
                       </tr>
@@ -1051,6 +1054,19 @@ function BookingsPage({ mode = "my" }) {
                 {selectedBooking.rejectionReason ? (
                   <div className="booking-detail-note booking-detail-note-error">
                     <strong>Rejection reason:</strong> {selectedBooking.rejectionReason}
+                  </div>
+                ) : null}
+
+                {!isAdmin && selectedBooking.status !== "APPROVED" ? (
+                  <div className="booking-modal-actions">
+                    <button
+                      type="button"
+                      className="booking-danger-btn"
+                      disabled={busyBookingId === selectedBooking.id}
+                      onClick={handleDeleteFromModal}
+                    >
+                      {busyBookingId === selectedBooking.id ? "Deleting..." : "Delete Booking"}
+                    </button>
                   </div>
                 ) : null}
               </div>

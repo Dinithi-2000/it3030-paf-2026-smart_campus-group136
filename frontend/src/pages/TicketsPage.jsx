@@ -21,7 +21,7 @@ const navItems = [
   { label: "My Bookings", to: "/my-bookings", icon: "booking" },
   { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
   { label: "Notifications", to: "/notifications", icon: "notifications" },
-  { label: "Analytics", to: "/admin", icon: "analytics" }
+  { label: "Analytics", to: "/analytics", icon: "analytics" }
 ];
 
 function prettyDate(value) {

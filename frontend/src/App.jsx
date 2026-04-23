@@ -18,6 +18,7 @@ import RoleBasedTicketsPage from "./pages/RoleBasedTicketsPage";
 import TechnicianDashboardPage from "./pages/TechnicianDashboardPage";
 import TechnicianTicketsPage from "./pages/TechnicianTicketsPage";
 import TicketsPage from "./pages/TicketsPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
       <Route path="/booking/:bookingId" element={<ProtectedRoute><AppLayout><BookingDetailsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/bookings"      element={<ProtectedRoute><Navigate to="/create-booking" replace /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><AppLayout><NotificationsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/analytics"     element={<ProtectedRoute><AppLayout><AnalyticsPage /></AppLayout></ProtectedRoute>} />
 
       {/* ── Ticketing – self-contained full-shell pages ── */}
       <Route path="/tickets"      element={<ProtectedRoute><RoleBasedTicketsPage /></ProtectedRoute>} />

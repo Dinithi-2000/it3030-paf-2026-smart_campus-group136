@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    @Query("SELECT b FROM Booking b WHERE b.resourceId = :resourceId AND b.status = 'APPROVED' AND b.startTime < :endTime AND b.endTime > :startTime")
+    @Query("SELECT b FROM Booking b WHERE b.resourceId = :resourceId AND b.status IN ('PENDING', 'APPROVED') AND b.startTime < :endTime AND b.endTime > :startTime")
     List<Booking> findOverlappingBookings(
         @Param("resourceId") String resourceId,
         @Param("startTime") LocalDateTime startTime,

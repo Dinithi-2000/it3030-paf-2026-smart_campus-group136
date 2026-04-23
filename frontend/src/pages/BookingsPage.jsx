@@ -141,6 +141,22 @@ function bookingStatusTone(status) {
   return tones[normalized] || tones.PENDING;
 }
 
+function formatBookingModalDateTime(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+}
+
+function isRecentlyCreatedBooking(booking) {
+  if (!booking || String(booking.status || "").toUpperCase() !== "PENDING" || !booking.createdAt) return false;
+
+  const timestamp = new Date(booking.createdAt).getTime();
+  if (Number.isNaN(timestamp)) return false;
+
+  const recentWindowMs = 24 * 60 * 60 * 1000;
+  return Date.now() - timestamp <= recentWindowMs;
+}
+
 function BookingsPage({ mode = "my" }) {
   const { user, roles, logout } = useAuth();
   const navigate = useNavigate();
@@ -179,6 +195,7 @@ function BookingsPage({ mode = "my" }) {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [resourceFilter, setResourceFilter] = useState("");
   const [form, setForm] = useState(INITIAL_FORM);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const formRef = useRef(null);
 
   const handleLogout = () => {
@@ -204,6 +221,21 @@ function BookingsPage({ mode = "my" }) {
     loadBookings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdminReviewView, isCreateView]);
+
+  useEffect(() => {
+    if (!selectedBooking) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setSelectedBooking(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedBooking]);
 
   const visibleBookings = useMemo(() => {
     return bookings
@@ -390,12 +422,22 @@ function BookingsPage({ mode = "my" }) {
     await handleReject(booking.id, reason);
   };
 
-  const handleViewBooking = (bookingId) => {
-    if (isAdminReviewView) {
-      navigate(`/admin-booking/${bookingId}`);
+  const handleViewBooking = (booking) => {
+    if (isMyView) {
+      setSelectedBooking(booking);
       return;
     }
-    navigate(`/booking/${bookingId}`);
+
+    if (isAdminReviewView) {
+      navigate(`/admin-booking/${booking.id}`);
+      return;
+    }
+
+    navigate(`/booking/${booking.id}`);
+  };
+
+  const closeBookingModal = () => {
+    setSelectedBooking(null);
   };
 
   const handleResetDraft = () => {
@@ -829,6 +871,7 @@ function BookingsPage({ mode = "my" }) {
                     const canApprove = isAdminReviewView && booking.status === "PENDING";
                     const canDelete = isAdminReviewView;
                     const statusTone = bookingStatusTone(booking.status);
+                    const isNewBooking = isAdminReviewView && isRecentlyCreatedBooking(booking);
 
                     return (
                       <tr
@@ -836,11 +879,14 @@ function BookingsPage({ mode = "my" }) {
                         className={
                           isStudentBookingsView
                             ? `${statusTone.border} ${booking.id % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-violet-50`
-                            : "booking-row"
+                            : `booking-row${isNewBooking ? " booking-row-new" : ""}`
                         }
                       >
                         <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>
-                          <strong>{booking.resourceId}</strong>
+                          <div className="booking-resource-cell">
+                            <strong>{booking.resourceId}</strong>
+                            {isNewBooking ? <span className="booking-new-badge">NEW</span> : null}
+                          </div>
                         </td>
                         <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>
                           <div className={isStudentBookingsView ? "flex flex-col gap-1" : "booking-purpose-cell"}>
@@ -857,7 +903,7 @@ function BookingsPage({ mode = "my" }) {
                             className={
                               isStudentBookingsView
                                 ? `inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${statusTone.badge}`
-                                : bookingStatusClass(booking.status)
+                                : `${bookingStatusClass(booking.status)}${isNewBooking ? " booking-status-new" : ""}`
                             }
                           >
                             {isStudentBookingsView ? <span className={`h-1.5 w-1.5 rounded-full ${statusTone.dot}`} /> : null}
@@ -873,7 +919,7 @@ function BookingsPage({ mode = "my" }) {
                                   ? "rounded-lg border border-violet-300 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-300 hover:text-violet-900"
                                   : "booking-ghost-btn"
                               }
-                              onClick={() => handleViewBooking(booking.id)}
+                              onClick={() => handleViewBooking(booking)}
                             >
                               View
                             </button>
@@ -933,6 +979,85 @@ function BookingsPage({ mode = "my" }) {
         </article>
         ) : null}
       </div>
+
+      {selectedBooking ? (
+        <div className="booking-modal-backdrop" onClick={closeBookingModal} role="presentation">
+          <article
+            className="booking-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="booking-modal-title"
+          >
+            <div className="booking-modal-head">
+              <div>
+                <p className="booking-detail-kicker">{selectedBooking.resourceId}</p>
+                <h2 id="booking-modal-title">Booking Details</h2>
+              </div>
+              <button type="button" className="booking-modal-close" onClick={closeBookingModal} aria-label="Close booking details">
+                ×
+              </button>
+            </div>
+
+            <div className="booking-detail-grid booking-modal-grid">
+              <div className="booking-detail-main">
+                <div className="booking-detail-header">
+                  <div>
+                    <p className="booking-detail-kicker">Booking ID {selectedBooking.id}</p>
+                    <h3>{selectedBooking.purpose}</h3>
+                  </div>
+                  <span className={bookingStatusClass(selectedBooking.status)}>
+                    {STATUS_LABELS[selectedBooking.status] || selectedBooking.status}
+                  </span>
+                </div>
+
+                <div className="booking-detail-meta booking-modal-meta">
+                  <div>
+                    <span>Requester</span>
+                    <strong>{selectedBooking.userId}</strong>
+                  </div>
+                  <div>
+                    <span>Resource</span>
+                    <strong>{selectedBooking.resourceId}</strong>
+                  </div>
+                  <div>
+                    <span>Start Time</span>
+                    <strong>{formatBookingModalDateTime(selectedBooking.startTime)}</strong>
+                  </div>
+                  <div>
+                    <span>End Time</span>
+                    <strong>{formatBookingModalDateTime(selectedBooking.endTime)}</strong>
+                  </div>
+                  <div>
+                    <span>Expected Attendees</span>
+                    <strong>{selectedBooking.expectedAttendees ?? "-"}</strong>
+                  </div>
+                  <div>
+                    <span>Created</span>
+                    <strong>{formatBookingModalDateTime(selectedBooking.createdAt)}</strong>
+                  </div>
+                </div>
+
+                {isRecentlyCreatedBooking(selectedBooking) ? (
+                  <div className="booking-detail-note booking-detail-note-new">
+                    <strong>New booking:</strong> This reservation was just entered and is being highlighted for admin review.
+                  </div>
+                ) : null}
+
+                <div className="booking-detail-note">
+                  <strong>Purpose:</strong> {selectedBooking.purpose}
+                </div>
+
+                {selectedBooking.rejectionReason ? (
+                  <div className="booking-detail-note booking-detail-note-error">
+                    <strong>Rejection reason:</strong> {selectedBooking.rejectionReason}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        </div>
+      ) : null}
         </section>
       </div>
     </section>

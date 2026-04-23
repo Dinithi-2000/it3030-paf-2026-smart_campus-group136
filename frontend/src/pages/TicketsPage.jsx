@@ -17,6 +17,7 @@ const priorityOptions = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const navItems = [
   { label: "Dashboard", to: "/", icon: "dashboard" },
   { label: "Resources", to: "/facilities", icon: "resources" },
+  { label: "Create Booking", to: "/create-booking", icon: "plus" },
   { label: "My Bookings", to: "/my-bookings", icon: "booking" },
   { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
   { label: "Notifications", to: "/notifications", icon: "notifications" },

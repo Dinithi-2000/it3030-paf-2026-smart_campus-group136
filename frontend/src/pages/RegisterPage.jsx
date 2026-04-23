@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./AuthPages.css";
@@ -12,7 +12,8 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -45,6 +46,71 @@ export default function RegisterPage() {
     }
     setLoading(false);
   };
+
+  const handleGoogleCredentialResponse = async (response) => {
+    setError("");
+    setLoading(true);
+
+    if (!response || !response.credential) {
+      setError("Google registration was cancelled.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const result = await googleLogin(response.credential);
+      if (result.success) {
+        navigate(result.redirectTo || "/");
+      } else {
+        setError(result.error || "Google registration failed");
+      }
+    } catch (error) {
+      setError(error.response?.data?.error || "Google registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    
+    const scriptId = "google-identity-script";
+    let script = document.getElementById(scriptId);
+
+    const initializeGoogle = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+
+        const btnContainer = document.getElementById("google-signup-container");
+        if (btnContainer) {
+          window.google.accounts.id.renderButton(btnContainer, {
+            theme: "outline",
+            size: "large",
+            width: "100%",
+            text: "signup_with",
+            shape: "rectangular"
+          });
+        }
+      }
+    };
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeGoogle;
+      document.body.appendChild(script);
+    } else {
+      initializeGoogle();
+    }
+  }, [GOOGLE_CLIENT_ID]);
 
   const roles = [
     { value: "USER", label: "USER", icon: "👤" },
@@ -110,6 +176,14 @@ export default function RegisterPage() {
 
           {error && <div className="auth-error-alert">{error}</div>}
           {success && <div className="auth-success-alert">{success}</div>}
+
+          <div id="google-signup-container" className="google-signin-container">
+            {/* Google button rendered here */}
+          </div>
+
+          <div className="form-divider">
+            <span>OR REGISTER WITH EMAIL</span>
+          </div>
 
           <form onSubmit={handleRegister} className="auth-form">
             <div className="form-group">

@@ -9,9 +9,45 @@
   gap: 20px;
 }
 
+.booking-page-admin-review {
+  --admin-accent: #155eef;
+  --admin-accent-soft: #eef4ff;
+  --admin-ink: #0f1f40;
+}
+
 .booking-page-admin .booking-hero {
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 14px 32px rgba(12, 58, 84, 0.2);
+}
+
+.booking-page-admin-review .booking-hero-admin {
+  background:
+    radial-gradient(circle at 88% 14%, rgba(255, 255, 255, 0.24), transparent 42%),
+    linear-gradient(132deg, #0f3466 0%, #155eef 58%, #2f7fff 100%);
+  border: 1px solid rgba(198, 218, 255, 0.55);
+  box-shadow: 0 22px 44px rgba(11, 46, 108, 0.3);
+  grid-template-columns: 1fr;
+  align-items: start;
+  overflow: visible;
+}
+
+.booking-page-admin-review .booking-hero-copy h1 {
+  font-size: clamp(1.4rem, 1.2rem + 0.9vw, 2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  color: #f4f8ff;
+}
+
+.booking-page-admin-review .booking-chip {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(222, 232, 255, 0.56);
+}
+
+.booking-page-admin-review .booking-chip-strong {
+  background: #f8fbff;
+  border-color: #d9e6ff;
+  color: #0d3a86;
 }
 
 .booking-page-admin .ops-panel {
@@ -117,6 +153,10 @@
   z-index: 1;
 }
 
+.booking-hero-stats-admin {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .booking-stat-card {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.23);
@@ -145,6 +185,27 @@
 .booking-stat-note {
   color: rgba(245, 252, 255, 0.86);
   font-size: 0.84rem;
+}
+
+.booking-page-admin-review .booking-stat-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.14));
+  border-color: rgba(222, 232, 255, 0.44);
+}
+
+.booking-page-admin-review .booking-stat-card strong {
+  text-shadow: 0 6px 16px rgba(10, 30, 78, 0.32);
+}
+
+.booking-page-admin-review .booking-stat-card-pending strong {
+  color: #ffe5a3;
+}
+
+.booking-page-admin-review .booking-stat-card-approved strong {
+  color: #baf5ce;
+}
+
+.booking-page-admin-review .booking-stat-card-cancelled strong {
+  color: #d9e7ff;
 }
 
 .booking-grid {
@@ -411,6 +472,29 @@
   background: linear-gradient(180deg, #fbfdff, #f6fafe);
 }
 
+.booking-page-admin-review .booking-filter-bar {
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border-color: #d8e4f7;
+  background: linear-gradient(180deg, #fcfdff, #f3f7ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 8px 20px rgba(17, 53, 108, 0.07);
+}
+
+.booking-page-admin-review .booking-filter-bar .booking-input,
+.booking-page-admin-review .booking-filter-bar .booking-select {
+  border-color: #d5e0f1;
+  background: #ffffff;
+  border-radius: 12px;
+  min-height: 44px;
+}
+
+.booking-page-admin-review .booking-filter-bar .booking-input:focus,
+.booking-page-admin-review .booking-filter-bar .booking-select:focus {
+  border-color: #82a8f4;
+  box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.14);
+}
+
 .booking-empty {
   min-height: 220px;
   display: grid;
@@ -461,11 +545,21 @@
   border-spacing: 0;
 }
 
+.booking-table-wrap-admin {
+  border-radius: 18px;
+  border: 1px solid #dde7f6;
+  background: linear-gradient(180deg, #ffffff, #f9fbff);
+  box-shadow: 0 14px 26px rgba(17, 46, 97, 0.08);
+  overflow: hidden;
+}
+
 .booking-table-admin thead th {
   position: sticky;
   top: 0;
-  background: linear-gradient(180deg, #fbfdff, #f5f9fd);
+  background: linear-gradient(180deg, #f8fbff, #edf4ff);
   z-index: 1;
+  color: #5d74a4;
+  font-weight: 800;
 }
 
 .booking-table-admin tbody tr:nth-child(even) {
@@ -477,12 +571,21 @@
 }
 
 .booking-table-actions-admin {
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+  min-width: 210px;
   align-items: stretch;
 }
 
 .booking-table-actions-admin button {
   width: 100%;
+  min-height: 36px;
+}
+
+.booking-cell-actions-admin {
+  width: auto;
+  min-width: 220px;
+  white-space: normal;
 }
 
 .booking-table th,
@@ -506,9 +609,36 @@
   background: #ffffff;
 }
 
+.booking-row-admin {
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
 .booking-row:hover,
 .booking-row-active {
   background: #f2f6fb;
+}
+
+.booking-row-admin:hover {
+  background: #edf4ff;
+  box-shadow: inset 3px 0 0 #2f63c7;
+}
+
+.booking-page-admin-review .booking-ghost-btn {
+  border-color: #c7daf8;
+  color: #2954a0;
+  background: #f7fbff;
+}
+
+.booking-page-admin-review .booking-success-btn {
+  background: linear-gradient(180deg, #e8faef, #d7f4e2);
+  border-color: #b5e5ca;
+  color: #0a7a4e;
+}
+
+.booking-page-admin-review .booking-danger-btn {
+  background: linear-gradient(180deg, #ffeef0, #ffdfe4);
+  border-color: #f4b7c2;
+  color: #ad2442;
 }
 
 .booking-table-admin .booking-row-active {
@@ -670,6 +800,70 @@
   .booking-detail-panel {
     position: static;
   }
+
+  .booking-hero-stats-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-table-actions-admin {
+    grid-template-columns: 1fr;
+    min-width: 136px;
+  }
+
+  .booking-cell-actions-admin {
+    min-width: 148px;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1120px) {
+  .booking-page-admin-review {
+    gap: 16px;
+  }
+
+  .booking-page-admin-review .booking-hero-admin {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .booking-page-admin-review .booking-hero-copy {
+    gap: 8px;
+  }
+
+  .booking-page-admin-review .booking-chip-row {
+    gap: 8px;
+  }
+
+  .booking-page-admin-review .booking-hero-stats-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .booking-page-admin-review .booking-stat-card {
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .booking-page-admin-review .booking-list-panel {
+    padding: 14px;
+  }
+
+  .booking-page-admin-review .booking-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .booking-page-admin-review .booking-table th,
+  .booking-page-admin-review .booking-table td {
+    padding: 11px 8px;
+  }
+
+  .booking-page-admin-review .booking-table-actions-admin {
+    grid-template-columns: repeat(2, minmax(88px, 1fr));
+    min-width: 196px;
+  }
+
+  .booking-page-admin-review .booking-cell-actions-admin {
+    min-width: 204px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -690,5 +884,9 @@
   .booking-actions,
   .booking-detail-actions {
     flex-direction: column;
+  }
+
+  .booking-hero-stats-admin {
+    grid-template-columns: 1fr;
   }
 }

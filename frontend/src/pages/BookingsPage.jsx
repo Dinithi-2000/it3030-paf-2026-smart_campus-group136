@@ -474,7 +474,7 @@ function BookingsPage({ mode = "my" }) {
           </div>
         </header>
 
-        <section className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""} ${isStudentBookingsView ? "min-h-screen rounded-3xl bg-slate-50 p-4 md:p-6" : ""}`}>
+        <section className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""}${isAdminReviewView ? " booking-page-admin-review" : ""} ${isStudentBookingsView ? "min-h-screen rounded-3xl bg-slate-50 p-4 md:p-6" : ""}`}>
           {isStudentBookingsView ? (
             <header ref={formRef} className="mb-6 space-y-4">
               <div className="rounded-2xl bg-linear-to-r from-violet-300 to-purple-300 p-6 shadow-md">
@@ -514,7 +514,7 @@ function BookingsPage({ mode = "my" }) {
               </div>
             </header>
           ) : (
-            <header className="ops-panel booking-hero" ref={formRef}>
+            <header className={`ops-panel booking-hero${isAdminReviewView ? " booking-hero-admin" : ""}`} ref={formRef}>
               <div className="booking-hero-copy">
                 <p className="eyebrow">Module B</p>
                 <h1>
@@ -540,17 +540,44 @@ function BookingsPage({ mode = "my" }) {
                 </div>
               </div>
 
-              <div className="booking-hero-stats">
-                <div className="booking-stat-card">
-                  <span className="booking-stat-label">Conflict preview</span>
-                  <strong>{draftConflicts.length}</strong>
-                  <span className="booking-stat-note">Approved overlaps detected in the current schedule snapshot</span>
-                </div>
-                <div className="booking-stat-card">
-                  <span className="booking-stat-label">Request status</span>
-                  <strong>Live</strong>
-                  <span className="booking-stat-note">Server-side validation still runs on submit</span>
-                </div>
+              <div className={`booking-hero-stats${isAdminReviewView ? " booking-hero-stats-admin" : ""}`}>
+                {isAdminReviewView ? (
+                  <>
+                    <div className="booking-stat-card booking-stat-card-total">
+                      <span className="booking-stat-label">Total</span>
+                      <strong>{visibleCount}</strong>
+                      <span className="booking-stat-note">Filtered bookings currently in scope</span>
+                    </div>
+                    <div className="booking-stat-card booking-stat-card-pending">
+                      <span className="booking-stat-label">Pending</span>
+                      <strong>{pendingCount}</strong>
+                      <span className="booking-stat-note">Requests waiting for admin action</span>
+                    </div>
+                    <div className="booking-stat-card booking-stat-card-approved">
+                      <span className="booking-stat-label">Approved</span>
+                      <strong>{approvedCount}</strong>
+                      <span className="booking-stat-note">Bookings confirmed for execution</span>
+                    </div>
+                    <div className="booking-stat-card booking-stat-card-cancelled">
+                      <span className="booking-stat-label">Cancelled</span>
+                      <strong>{cancelledCount}</strong>
+                      <span className="booking-stat-note">Cancelled or withdrawn reservations</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="booking-stat-card">
+                      <span className="booking-stat-label">Conflict preview</span>
+                      <strong>{draftConflicts.length}</strong>
+                      <span className="booking-stat-note">Approved overlaps detected in the current schedule snapshot</span>
+                    </div>
+                    <div className="booking-stat-card">
+                      <span className="booking-stat-label">Request status</span>
+                      <strong>Live</strong>
+                      <span className="booking-stat-note">Server-side validation still runs on submit</span>
+                    </div>
+                  </>
+                )}
               </div>
             </header>
           )}
@@ -810,7 +837,7 @@ function BookingsPage({ mode = "my" }) {
               </div>
             )
           ) : (
-            <div className={isStudentBookingsView ? "overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm" : "ops-table-wrap"}>
+            <div className={isStudentBookingsView ? "overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm" : `ops-table-wrap${isAdminReviewView ? " booking-table-wrap-admin" : ""}`}>
               <table className={`${isStudentBookingsView ? "min-w-195 w-full border-separate border-spacing-0" : `booking-table${isAdminReviewView ? " booking-table-admin" : ""}`}`}>
                 <thead>
                   <tr>
@@ -836,7 +863,7 @@ function BookingsPage({ mode = "my" }) {
                         className={
                           isStudentBookingsView
                             ? `${statusTone.border} ${booking.id % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-violet-50`
-                            : "booking-row"
+                            : `booking-row${isAdminReviewView ? " booking-row-admin" : ""}`
                         }
                       >
                         <td className={isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>
@@ -864,7 +891,7 @@ function BookingsPage({ mode = "my" }) {
                             {STATUS_LABELS[booking.status] || booking.status}
                           </span>
                         </td>
-                        <td className={isStudentBookingsView ? "px-4 py-3" : ""} onClick={(event) => event.stopPropagation()}>
+                        <td className={isStudentBookingsView ? "px-4 py-3" : `${isAdminReviewView ? "booking-cell-actions-admin" : ""}`} onClick={(event) => event.stopPropagation()}>
                           <div className={isStudentBookingsView ? "flex flex-wrap items-center gap-2" : `booking-table-actions${isAdminReviewView ? " booking-table-actions-admin" : ""}`}>
                             <button
                               type="button"

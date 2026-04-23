@@ -4,7 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 
 /* ── Navigation items (mirrors DashboardPage) ── */
 const navItems = [
-  { label: "Dashboard",      to: "/",               icon: "dashboard" },
+  { label: "Dashboard",      to: "/dashboard",       icon: "dashboard" },
   { label: "Resources",      to: "/facilities",      icon: "resources" },
   { label: "Create Booking", to: "/create-booking",  icon: "booking" },
   { label: "My Bookings",    to: "/my-bookings",     icon: "booking" },

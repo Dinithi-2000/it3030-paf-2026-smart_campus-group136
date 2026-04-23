@@ -27,8 +27,11 @@ function App() {
       <Route path="/login"        element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/register"     element={<PublicRoute><RegisterPage /></PublicRoute>} />
 
+      {/* Root always redirects to login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
       {/* ── Role-based home – handled without AppLayout (each page has its own shell) ── */}
-      <Route path="/" element={<ProtectedRoute><RoleBasedDashboardPage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><RoleBasedDashboardPage /></ProtectedRoute>} />
 
       {/* ── General protected routes (need AppLayout top-nav) ── */}
       <Route path="/facilities"    element={<ProtectedRoute><DashboardShell><FacilitiesPage /></DashboardShell></ProtectedRoute>} />

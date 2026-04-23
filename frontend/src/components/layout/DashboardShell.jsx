@@ -18,7 +18,7 @@ const navItems = {
     { label: "Notifications", to: "/notifications", icon: "notifications" }
   ],
   USER: [
-    { label: "Dashboard", to: "/", icon: "dashboard" },
+    { label: "Dashboard", to: "/dashboard", icon: "dashboard" },
     { label: "Resources", to: "/facilities", icon: "resources" },
     { label: "Create Booking", to: "/create-booking", icon: "booking" },
     { label: "My Bookings", to: "/my-bookings", icon: "booking" },
@@ -79,7 +79,7 @@ export default function DashboardShell({ children }) {
             <NavLink
               key={item.to + item.label}
               to={item.to}
-              end={item.to === "/" || item.to === "/admin-dashboard" || item.to === "/tech-dashboard"}
+              end={item.to === "/" || item.to === "/dashboard" || item.to === "/admin-dashboard" || item.to === "/tech-dashboard"}
               className={({ isActive }) =>
                 `ops-menu-link${isActive ? " ops-menu-link-active" : ""}`
               }

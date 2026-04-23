@@ -36,7 +36,7 @@ const STATUS_ORDER = {
 };
 
 const baseNavItems = [
-  { label: "Dashboard", to: "/", icon: "dashboard" },
+  { label: "Dashboard",      to: "/dashboard",        icon: "dashboard" },
   { label: "Resources", to: "/facilities", icon: "resources" },
   { label: "My Bookings", to: "/my-bookings", icon: "booking" },
   { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
@@ -426,7 +426,7 @@ function BookingsPage({ mode = "my" }) {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === "/"}
+              end={item.to === "/dashboard"}
               className={({ isActive }) =>
                 `ops-menu-link${isActive ? " ops-menu-link-active" : ""}`
               }

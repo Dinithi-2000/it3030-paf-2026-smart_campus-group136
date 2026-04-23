@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { createContext, useContext, useMemo, useState, useEffect, useCallback } from "react";
 import AuthService from "../api/authService";
 
 const AuthContext = createContext(null);
@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async (username, password) => {
+  const login = useCallback(async (username, password) => {
     try {
       const data = await AuthService.login(username, password);
       const userData = data.user || { username: data.username };
@@ -27,21 +27,21 @@ export function AuthProvider({ children }) {
         ? "/admin-dashboard"
         : userRoles.includes("TECHNICIAN")
         ? "/tech-dashboard"
-        : "/";
-      
+        : "/dashboard";
+
       setUser(userData);
       setRoles(userRoles);
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("roles", JSON.stringify(userRoles));
       localStorage.setItem("authToken", `Basic ${btoa(`${username}:${password}`)}`);
-      
+
       return { success: true, user: userData, roles: userRoles, redirectTo };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || "Login failed" };
     }
-  };
+  }, []);
 
- const googleLogin = async (idToken) => {
+  const googleLogin = useCallback(async (idToken) => {
     try {
       const data = await AuthService.googleLogin(idToken);
       const userData = data.user || { username: data.username };
@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
         ? "/admin-dashboard"
         : userRoles.includes("TECHNICIAN")
         ? "/tech-dashboard"
-        : "/";
+        : "/dashboard";
       setUser(userData);
       setRoles(userRoles);
       localStorage.setItem("user", JSON.stringify(userData));
@@ -60,9 +60,9 @@ export function AuthProvider({ children }) {
     } catch (error) {
       return { success: false, error: error.response?.data?.error || "Google sign-in failed" };
     }
-  };
+  }, []);
 
-  const register = async (username, displayName, email, role = "USER", password) => {
+  const register = useCallback(async (username, displayName, email, role = "USER", password) => {
     try {
       await AuthService.register(username, displayName, email, role, password);
       return { success: true };
@@ -74,15 +74,15 @@ export function AuthProvider({ children }) {
         "Registration failed";
       return { success: false, error: message };
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setRoles([]);
     AuthService.logout();
-  };
+  }, []);
 
-  const hasRole = (role) => roles.includes(role);
+  const hasRole = useCallback((role) => roles.includes(role), [roles]);
 
   const value = useMemo(
     () => ({
@@ -94,9 +94,10 @@ export function AuthProvider({ children }) {
       register,
       logout,
       hasRole,
-      isAuthenticated: !!user
+      isAuthenticated: !!user,
     }),
-    [user, roles, loading,login, googleLogin, register, logout, hasRole]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, roles, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -109,4 +110,3 @@ export function useAuth() {
   }
   return context;
 }
-

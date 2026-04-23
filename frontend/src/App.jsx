@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
+import DashboardShell from "./components/layout/DashboardShell";
 import { ProtectedRoute, PublicRoute } from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -30,7 +31,7 @@ function App() {
       <Route path="/" element={<ProtectedRoute><RoleBasedDashboardPage /></ProtectedRoute>} />
 
       {/* ── General protected routes (need AppLayout top-nav) ── */}
-      <Route path="/facilities"    element={<ProtectedRoute><AppLayout><FacilitiesPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/facilities"    element={<ProtectedRoute><DashboardShell><FacilitiesPage /></DashboardShell></ProtectedRoute>} />
       <Route path="/create-booking" element={<ProtectedRoute><AppLayout><CreateBookingPage /></AppLayout></ProtectedRoute>} />
       <Route path="/my-bookings"   element={<ProtectedRoute><AppLayout><MyBookingsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/booking/:bookingId" element={<ProtectedRoute><AppLayout><BookingDetailsPage /></AppLayout></ProtectedRoute>} />

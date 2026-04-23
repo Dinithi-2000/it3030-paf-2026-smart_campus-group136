@@ -91,9 +91,9 @@ function NavIcon({ type }) {
 }
 
 /* ── Mini bar chart (SVG, no lib) ── */
-const BAR_W = 22;
-const BAR_GAP = 8;
-const CHART_H = 110;
+const BAR_W = 16;
+const BAR_GAP = 6;
+const CHART_H = 70;
 
 function BookingBar({ day, bookings, cancelled, maxVal }) {
   const bH = Math.round((bookings / maxVal) * CHART_H);
@@ -323,52 +323,48 @@ export default function AnalyticsPage() {
           </div>
 
           {/* ── Charts row ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.7fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
             {/* Booking trend chart */}
             <article className="ops-panel">
               <div className="ops-panel-head">
-                <h2>Bookings Over Time</h2>
-                <div style={{ display: "flex", gap: 14, fontSize: "0.74rem", fontWeight: 700 }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#15b593" }}>
-                    <span style={{ width: 10, height: 10, borderRadius: 3, background: "#15b593", display: "inline-block" }} />
-                    Booked
-                  </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#ef5a6b" }}>
-                    <span style={{ width: 10, height: 10, borderRadius: 3, background: "#ef5a6b", display: "inline-block" }} />
-                    Cancelled
-                  </span>
-                </div>
+                <h2 style={{ fontSize: "0.9rem" }}>Bookings Trend</h2>
               </div>
               <BookingTrendChart />
+              <div style={{ display: "flex", gap: 10, fontSize: "0.65rem", fontWeight: 700, marginTop: 8 }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, color: "#15b593" }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: "#15b593", display: "inline-block" }} />
+                  Booked
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4, color: "#ef5a6b" }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: "#ef5a6b", display: "inline-block" }} />
+                  Cancelled
+                </span>
+              </div>
             </article>
 
             {/* Ticket breakdown donut */}
             <article className="ops-panel">
               <div className="ops-panel-head">
-                <h2>Ticket Status</h2>
+                <h2 style={{ fontSize: "0.9rem" }}>Tickets</h2>
               </div>
               <DonutChart data={ticketStats} />
             </article>
-          </div>
 
-          {/* ── Bottom row ── */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            {/* Resource utilisation bars */}
+            {/* Resource utilisation bars (Moved here) */}
             <article className="ops-panel">
               <div className="ops-panel-head">
-                <h2>Resource Utilisation</h2>
-                <button type="button">Full Report</button>
+                <h2 style={{ fontSize: "0.9rem" }}>Usage</h2>
               </div>
-              <div className="pulse-list">
-                {resourceUsage.map(item => {
+              <div className="pulse-list" style={{ gap: 8 }}>
+                {resourceUsage.slice(0, 4).map(item => {
                   const tone = TONE_STYLES[item.tone];
                   return (
-                    <div key={item.label} className="pulse-item">
-                      <div className="pulse-meta">
+                    <div key={item.label} className="pulse-item" style={{ marginBottom: 0 }}>
+                      <div className="pulse-meta" style={{ fontSize: "0.75rem" }}>
                         <span>{item.label}</span>
                         <strong>{item.value}%</strong>
                       </div>
-                      <div className="pulse-track">
+                      <div className="pulse-track" style={{ height: 4 }}>
                         <div
                           className="pulse-fill"
                           style={{ width: `${item.value}%`, background: tone.bar }}
@@ -379,13 +375,16 @@ export default function AnalyticsPage() {
                 })}
               </div>
             </article>
+          </div>
 
+          {/* ── Bottom row ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
             {/* Recent bookings mini-table */}
             <article className="ops-panel">
               <div className="ops-panel-head">
-                <h2>Recent Bookings</h2>
+                <h2>Recent System Activity</h2>
                 <button type="button" onClick={() => navigate("/my-bookings")}>
-                  View All
+                  Full Report
                 </button>
               </div>
               <div className="ops-table-wrap">

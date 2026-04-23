@@ -24,3 +24,7 @@ logging:
   level:
     root: INFO
     org.springframework.security: INFO
+
+google:
+  oauth:
+    client-id: 859816833703-8n10kjeca2ub8jr4hmme7oof4vi97f93.apps.googleusercontent.com

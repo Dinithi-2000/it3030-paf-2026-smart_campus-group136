@@ -20,17 +20,18 @@ public class RoleService {
         return roleRepository.findAll();
     }
 
-  public Optional<Role> findById(String id) {
-        return roleRepository.findById(Long.parseLong(id));
-    }
+
+    public Optional<Role> findById(Long id) {
+        return roleRepository.findById(id);
     }
 
     public Role create(Role role) {
         return roleRepository.save(role);
     }
 
-    public Optional<Role> update(String id, Role update) {
-        return roleRepository.findById(Long.parseLong(id)).map(existing -> {
+
+    public Optional<Role> update(Long id, Role update) {
+        return roleRepository.findById(id).map(existing -> {
             existing.setName(update.getName());
             existing.setDescription(update.getDescription());
             existing.setPermissions(update.getPermissions());
@@ -38,7 +39,7 @@ public class RoleService {
         });
     }
 
-    public void delete(String id) {
-        roleRepository.deleteById(Long.parseLong(id));
+    public void delete(Long id) {
+        roleRepository.deleteById(id);
     }
 }

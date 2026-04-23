@@ -60,9 +60,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     void markAllAsRead(@Param("userId") Long userId);
 
     /**
-     * Delete old notifications (older than days)
+     * Delete old notifications (older than a given date)
      */
     @Modifying
-    @Query("DELETE FROM Notification n WHERE n.user.id = :userId AND n.createdAt < CURRENT_TIMESTAMP - :days")
-    void deleteOldNotifications(@Param("userId") Long userId, @Param("days") Integer days);
+    @Query("DELETE FROM Notification n WHERE n.user.id = :userId AND n.createdAt < :cutoff")
+    void deleteOldNotifications(@Param("userId") Long userId, @Param("cutoff") java.time.LocalDateTime cutoff);
 }

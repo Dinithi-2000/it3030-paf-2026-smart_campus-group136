@@ -33,6 +33,10 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)

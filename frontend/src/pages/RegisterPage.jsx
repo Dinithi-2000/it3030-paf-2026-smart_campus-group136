@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./AuthPages.css";
@@ -12,7 +12,60 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
+  const googleBtnRef = useRef(null);
+
+  const handleGoogleCallback = async (response) => {
+    try {
+      setError("");
+      setSuccess("");
+      setLoading(true);
+      if (!response?.credential) {
+        setError("Google sign-in failed: no credential returned");
+        setLoading(false);
+        return;
+      }
+      const result = await googleLogin(response.credential);
+      if (result.success) {
+        setSuccess("Signed in successfully! Redirecting...");
+        setTimeout(() => navigate(result.redirectTo || "/"), 800);
+      } else {
+        setError(result.error || "Google sign-up failed");
+      }
+    } catch (ex) {
+      setError("Google sign-up error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+    const scriptId = "google-identity-service";
+    if (document.getElementById(scriptId)) {
+      if (window.google?.accounts?.id && googleBtnRef.current) {
+        window.google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCallback });
+        window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "outline", size: "large", text: "signup_with", shape: "rectangular" });
+      }
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.id = scriptId;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.google?.accounts?.id && googleBtnRef.current) {
+        window.google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCallback });
+        window.google.accounts.id.renderButton(googleBtnRef.current, { theme: "outline", size: "large", text: "signup_with", shape: "rectangular" });
+      }
+    };
+    document.body.appendChild(script);
+    return () => {
+      // leave the script in place for other pages; no-op cleanup
+    };
+  }, [googleBtnRef]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -198,6 +251,20 @@ export default function RegisterPage() {
               </svg>
             </button>
           </form>
+
+          <div className="auth-divider"><span>OR</span></div>
+          <div className="google-signup-wrapper">
+            <div ref={googleBtnRef} />
+            {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+              <button
+                type="button"
+                className="auth-submit-btn google-plain-btn"
+                disabled
+              >
+                Sign up using Google (client ID not configured)
+              </button>
+            )}
+          </div>
 
           <div className="auth-form-footer">
             <p className="auth-footer-text">

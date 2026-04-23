@@ -63,6 +63,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * Delete old notifications (older than days)
      */
     @Modifying
-    @Query("DELETE FROM Notification n WHERE n.user.id = :userId AND n.createdAt < CURRENT_TIMESTAMP - :days")
+    @Query(value = "DELETE FROM notifications WHERE user_id = :userId AND created_at < DATE_SUB(NOW(), INTERVAL :days DAY)", nativeQuery = true)
     void deleteOldNotifications(@Param("userId") Long userId, @Param("days") Integer days);
 }

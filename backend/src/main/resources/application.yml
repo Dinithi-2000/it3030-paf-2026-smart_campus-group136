@@ -22,7 +22,7 @@ server:
 
 google:
   oauth:
-    client-id: YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
+    client-id: 896726238656-b5dtrd7sefmgcdoc64l0patml0ir9196.apps.googleusercontent.com
 
 logging:
   level:

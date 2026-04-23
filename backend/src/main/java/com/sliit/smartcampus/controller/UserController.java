@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -103,12 +104,17 @@ public class UserController {
             return ResponseEntity.badRequest().body(Map.of("error", "ID token is required"));
         }
 
+        // Debug: log incoming DTO values for troubleshooting
+        System.out.println("[DEBUG] /google-login called. raw credential=" + dto.getCredential() + ", raw id_token=" + dto.getId_token() + ", resolved idToken=" + dto.getIdToken());
+
         if (googleClientId == null || googleClientId.isBlank()) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("error", "Google client ID is not configured on the server."));
         }
-
         var payload = verifyGoogleIdToken(dto.getIdToken());
+        if (payload == null) {
+            System.out.println("[DEBUG] Google ID token verification returned null for token: " + dto.getIdToken());
+        }
         if (payload == null || payload.getEmail() == null) {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Google ID token"));
         }
@@ -145,6 +151,7 @@ public class UserController {
             var idToken = verifier.verify(idTokenString);
             return idToken != null ? idToken.getPayload() : null;
         } catch (Exception ex) {
+            ex.printStackTrace();
             return null;
         }
     }
@@ -238,14 +245,38 @@ public class UserController {
     }
 
     public static class GoogleLoginDto {
-        public String idToken;
+        // Accept multiple possible JSON property names that frontends may send
+        private String idToken;
+        private String credential;
+
+        @JsonProperty("id_token")
+        private String id_token;
 
         public String getIdToken() {
-            return idToken;
+            if (idToken != null && !idToken.isBlank()) return idToken;
+            if (credential != null && !credential.isBlank()) return credential;
+            if (id_token != null && !id_token.isBlank()) return id_token;
+            return null;
         }
 
         public void setIdToken(String idToken) {
             this.idToken = idToken;
+        }
+
+        public String getCredential() {
+            return credential;
+        }
+
+        public void setCredential(String credential) {
+            this.credential = credential;
+        }
+
+        public String getId_token() {
+            return id_token;
+        }
+
+        public void setId_token(String id_token) {
+            this.id_token = id_token;
         }
     }
 

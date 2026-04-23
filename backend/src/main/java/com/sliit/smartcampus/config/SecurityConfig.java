@@ -24,12 +24,19 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final GoogleTokenFilter googleTokenFilter;
+
+    public SecurityConfig(GoogleTokenFilter googleTokenFilter) {
+        this.googleTokenFilter = googleTokenFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> {})
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(Customizer.withDefaults())
+                .addFilterBefore(googleTokenFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

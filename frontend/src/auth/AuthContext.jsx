@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
       setRoles(userRoles);
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("roles", JSON.stringify(userRoles));
-      localStorage.setItem("authToken", btoa(`${username}:${password}`));
+      localStorage.setItem("authToken", `Basic ${btoa(`${username}:${password}`)}`);
       
       return { success: true, user: userData, roles: userRoles, redirectTo };
     } catch (error) {
@@ -55,7 +55,7 @@ export function AuthProvider({ children }) {
       setRoles(userRoles);
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("roles", JSON.stringify(userRoles));
-      localStorage.setItem("authToken", idToken);
+      localStorage.setItem("authToken", `Bearer ${idToken}`);
       return { success: true, user: userData, roles: userRoles, redirectTo };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || "Google sign-in failed" };

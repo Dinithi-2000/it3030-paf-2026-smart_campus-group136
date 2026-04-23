@@ -13,7 +13,7 @@ client.interceptors.request.use((config) => {
   const authToken = localStorage.getItem("authToken");
   if (authToken) {
     config.headers = config.headers || {};
-    config.headers.Authorization = `Basic ${authToken}`;
+    config.headers.Authorization = authToken;
   }
 
   return config;

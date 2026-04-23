@@ -3,7 +3,6 @@ import AppLayout from "./components/layout/AppLayout";
 import { ProtectedRoute, PublicRoute } from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import UnauthorizedPage from "./pages/UnauthorizedPage";
 import AdminBookingDetailsPage from "./pages/AdminBookingDetailsPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
 import AdminPage from "./pages/AdminPage";
@@ -26,7 +25,6 @@ function App() {
       {/* Public routes */}
       <Route path="/login"        element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/register"     element={<PublicRoute><RegisterPage /></PublicRoute>} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* ── Role-based home – handled without AppLayout (each page has its own shell) ── */}
       <Route path="/" element={<ProtectedRoute><RoleBasedDashboardPage /></ProtectedRoute>} />

@@ -7,7 +7,7 @@ const navItems = [
   { to: "/facilities", label: "Facilities" },
   { to: "/my-bookings", label: "My Bookings" },
   { to: "/notifications", label: "Notifications" },
-  { to: "/admin", label: "Analytics" }
+  { to: "/analytics", label: "Analytics" }
 ];
 
 function TopNav() {

@@ -1,6 +1,6 @@
 import client from "./client";
 
-const API_BASE = "/api/notifications";
+const API_BASE = "/notifications";
 
 /**
  * Notification Service for Member 4 - Notifications Module

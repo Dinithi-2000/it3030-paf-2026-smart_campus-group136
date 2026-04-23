@@ -1,35 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import notificationService from "../api/notificationService";
 import { useAuth } from "../auth/AuthContext";
+import OperationsShell from "../components/layout/OperationsShell";
 import "./NotificationsPage.css";
-
-const navItems = [
-  { label: "Dashboard", to: "/", icon: "dashboard" },
-  { label: "Resources", to: "/facilities", icon: "resources" },
-  { label: "Create Booking", to: "/create-booking", icon: "plus" },
-  { label: "Booking", to: "/bookings", icon: "booking" },
-  { label: "Ticketing", to: "/tickets", icon: "ticketing" },
-  { label: "Notifications", to: "/notifications", icon: "notifications" },
-  { label: "Analytics", to: "/admin", icon: "analytics" }
-];
-
-function navIcon(type) {
-  const icons = {
-    dashboard: "M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 7v-7h7v7h-7Z",
-    resources: "M12 3 3 8l9 5 9-5-9-5Zm-7.5 8.8V16L12 21l7.5-5v-4.2L12 16l-7.5-4.2Z",
-    booking: "M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10Z",
-    ticketing: "M4 7h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5V7Zm9 3h-2v2h2v-2Zm0 4h-2v2h2v-2Z",
-    notifications: "M12 3a6 6 0 0 0-6 6v3.7L4.7 15a1 1 0 0 0 .86 1.5h12.88a1 1 0 0 0 .86-1.5L18 12.7V9a6 6 0 0 0-6-6Zm0 18a2.4 2.4 0 0 0 2.3-1.8H9.7A2.4 2.4 0 0 0 12 21Z",
-    analytics: "M5 21h14v-2H5v2Zm1-4h2V9H6v8Zm5 0h2V5h-2v12Zm5 0h2v-6h-2v6Z"
-  };
-
-  return (
-    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-      <path d={icons[type]} fill="currentColor" />
-    </svg>
-  );
-}
 
 /**
  * NotificationsPage Component - Member 4
@@ -44,22 +18,17 @@ function NotificationsPage() {
   const [filterType, setFilterType] = useState("ALL");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedNotifications, setSelectedNotifications] = useState(new Set());
-  const { user, roles, hasRole, isAuthenticated, logout } = useAuth();
+  const { user, hasRole } = useAuth();
   const isAdmin = hasRole("ADMIN");
   const isTechnician = hasRole("TECHNICIAN");
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   // Fetch notifications on mount and when page changes
   useEffect(() => {
     if (user) {
       fetchNotifications();
     }
-  }, [user]);
+  }, [user, page]);
 
   // Apply filters and sorting
   useEffect(() => {
@@ -173,267 +142,213 @@ function NotificationsPage() {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  const navItems = [
+    { label: "Dashboard", to: "/", icon: "dashboard" },
+    { label: "Resources", to: "/facilities", icon: "resources" },
+    { label: "My Bookings", to: "/my-bookings", icon: "booking" },
+    { label: "Ticketing", to: "/tickets", icon: "ticketing" },
+    { label: "Notifications", to: "/notifications", icon: "notifications" },
+    { label: "Analytics", to: "/admin", icon: "analytics" }
+  ];
+
   return (
-    <section className="ops-shell">
-      <aside className="ops-sidebar">
-        <div className="ops-brand">
-          <div className="ops-logo">SC</div>
-          <div>
-            <h2>Operations Hub</h2>
-            <p>INTELLIGENT OBSERVATORIUM</p>
+    <OperationsShell
+      title="Notifications"
+      subtitle="Comprehensive notification management for campus users."
+      navItems={navItems}
+    >
+      <div className="notifications-page">
+        <div className="notifications-header">
+          <div className="header-title">
+            <h1>📬 Notifications</h1>
+            {unreadCount > 0 && (
+              <span className="unread-badge">{unreadCount} unread</span>
+            )}
+          </div>
+          <div className="header-actions">
+            {unreadCount > 0 && (
+              <button
+                className="btn-primary"
+                onClick={handleMarkAllAsRead}
+                title="Mark all notifications as read"
+              >
+                ✓ Mark all read
+              </button>
+            )}
           </div>
         </div>
 
-        <nav className="ops-menu" aria-label="Dashboard navigation">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) => `ops-menu-link${isActive ? " ops-menu-link-active" : ""}`}
+        <div className="notifications-controls">
+          <div className="filter-section">
+            <label>Filter by type:</label>
+            <select
+              value={filterType}
+              onChange={(e) => {
+                setFilterType(e.target.value);
+                setPage(0);
+              }}
+              className="filter-select"
             >
-              <span className="menu-link-content">
-                {navIcon(item.icon)}
-                <span>{item.label}</span>
-              </span>
-            </NavLink>
-          ))}
-        </nav>
+              {notificationTypes.map((type) => (
+                <option key={type} value={type}>
+                  {notificationService.getNotificationTypeDisplay(type)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="ops-sidebar-foot">
-          <button type="button">Support</button>
-          <button type="button">Settings</button>
-          <button type="button" className="danger" onClick={handleLogout}>
-            Sign Out
-          </button>
+          <div className="sort-section">
+            <label>Sort by:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="sort-select"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="unread-first">Unread First</option>
+            </select>
+          </div>
+
+          {selectedNotifications.size > 0 && (
+            <div className="bulk-actions">
+              <span>{selectedNotifications.size} selected</span>
+              <button
+                className="btn-danger"
+                onClick={handleBulkDelete}
+                title="Delete selected notifications"
+              >
+                🗑️ Delete Selected
+              </button>
+            </div>
+          )}
         </div>
-      </aside>
 
-      <div className="ops-main">
-        <header className="ops-topbar">
-          <input type="search" placeholder="Global system search..." />
-          <div className="ops-top-actions">
-            <button type="button" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
-                <path
-                  d="M12 3a6 6 0 0 0-6 6v3.6l-1.4 2.3a1 1 0 0 0 .86 1.51h13.08a1 1 0 0 0 .86-1.51L18 12.6V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
-            <button type="button" aria-label="Logout" className="logout-soft" onClick={handleLogout}>
-              <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
-                <path
-                  d="M10 4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-8a1 1 0 1 1 0-2h7V5h-7a1 1 0 0 1-1-1ZM13.7 12.7a1 1 0 0 0 0-1.4l-2-2a1 1 0 1 0-1.4 1.4L10.59 11H4a1 1 0 1 0 0 2h6.59l-.29.29a1 1 0 1 0 1.4 1.42l2-2.01Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
-            <div className="ops-user">
-              <div>
-                <strong>{user?.displayName || user?.username || "Campus User"}</strong>
-                <span>{roles?.[0] || "USER"}</span>
-              </div>
-              <div className="avatar">{(user?.displayName || user?.username || "U").charAt(0).toUpperCase()}</div>
+        <div className="notifications-list">
+          {loading && page === 0 ? (
+            <div className="loading">Loading notifications...</div>
+          ) : filteredNotifications.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📭</div>
+              <p>No notifications yet</p>
+              <small>You're all caught up!</small>
             </div>
-          </div>
-        </header>
-
-        <section className="ops-content">
-          <div className="notifications-page">
-            <div className="notifications-header">
-              <div className="header-title">
-                <h1>📬 Notifications</h1>
-                {unreadCount > 0 && (
-                  <span className="unread-badge">{unreadCount} unread</span>
-                )}
-              </div>
-              <div className="header-actions">
-                {unreadCount > 0 && (
-                  <button
-                    className="btn-primary"
-                    onClick={handleMarkAllAsRead}
-                    title="Mark all notifications as read"
-                  >
-                    ✓ Mark all read
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="notifications-controls">
-              <div className="filter-section">
-                <label>Filter by type:</label>
-                <select
-                  value={filterType}
-                  onChange={(e) => {
-                    setFilterType(e.target.value);
-                    setPage(0);
-                  }}
-                  className="filter-select"
+          ) : (
+            <>
+              {filteredNotifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`notification-card ${notification.isRead ? "read" : "unread"}`}
                 >
-                  {notificationTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {notificationService.getNotificationTypeDisplay(type)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="notification-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedNotifications.has(notification.id)}
+                      onChange={() => toggleNotificationSelection(notification.id)}
+                      aria-label="Select notification"
+                    />
+                  </div>
 
-              <div className="sort-section">
-                <label>Sort by:</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="sort-select"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="unread-first">Unread First</option>
-                </select>
-              </div>
+                  <div className="notification-icon">
+                    {notificationService.getNotificationIcon(notification.type)}
+                  </div>
 
-              {selectedNotifications.size > 0 && (
-                <div className="bulk-actions">
-                  <span>{selectedNotifications.size} selected</span>
-                  <button
-                    className="btn-danger"
-                    onClick={handleBulkDelete}
-                    title="Delete selected notifications"
-                  >
-                    🗑️ Delete Selected
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="notifications-list">
-              {loading && page === 0 ? (
-                <div className="loading">Loading notifications...</div>
-              ) : filteredNotifications.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon">📭</div>
-                  <p>No notifications yet</p>
-                  <small>You're all caught up!</small>
-                </div>
-              ) : (
-                <>
-                  {filteredNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`notification-card ${notification.isRead ? "read" : "unread"}`}
-                    >
-                      <div className="notification-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedNotifications.has(notification.id)}
-                          onChange={() => toggleNotificationSelection(notification.id)}
-                          aria-label="Select notification"
-                        />
-                      </div>
-
-                      <div className="notification-icon">
-                        {notificationService.getNotificationIcon(notification.type)}
-                      </div>
-
-                      <div className="notification-content" onClick={() => {
-                        if (!notification.isRead) {
-                          handleMarkAsRead(notification.id);
-                        }
-                        if (notification.relatedEntityType === "BOOKING") {
-                          navigate("/bookings");
-                        } else if (notification.relatedEntityType === "TICKET") {
-                          navigate("/tickets");
-                        }
-                      }}>
-                        <div className="notification-header">
-                          <h3 className="notification-title">{notification.title}</h3>
-                          <span className="notification-type">
-                            {notificationService.getNotificationTypeDisplay(notification.type)}
-                          </span>
-                        </div>
-                        <p className="notification-message">{notification.message}</p>
-                        <div className="notification-meta">
-                          <span className="notification-time">
-                            {formatTime(notification.createdAt)}
-                          </span>
-                          {notification.relatedEntityType && (
-                            <span className="notification-entity">
-                              → {notification.relatedEntityType}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="notification-actions">
-                        {!notification.isRead && (
-                          <button
-                            className="btn-icon"
-                            onClick={() => handleMarkAsRead(notification.id)}
-                            title="Mark as read"
-                          >
-                            ✓
-                          </button>
-                        )}
-                        <button
-                          className="btn-icon danger"
-                          onClick={() => handleDeleteNotification(notification.id)}
-                          title="Delete notification"
-                        >
-                          🗑️
-                        </button>
-                      </div>
+                  <div className="notification-content" onClick={() => {
+                    if (!notification.isRead) {
+                      handleMarkAsRead(notification.id);
+                    }
+                    if (notification.relatedEntityType === "BOOKING") {
+                      navigate("/bookings");
+                    } else if (notification.relatedEntityType === "TICKET") {
+                      navigate("/tickets");
+                    }
+                  }}>
+                    <div className="notification-header">
+                      <h3 className="notification-title">{notification.title}</h3>
+                      <span className="notification-type">
+                        {notificationService.getNotificationTypeDisplay(notification.type)}
+                      </span>
                     </div>
-                  ))}
+                    <p className="notification-message">{notification.message}</p>
+                    <div className="notification-meta">
+                      <span className="notification-time">
+                        {formatTime(notification.createdAt)}
+                      </span>
+                      {notification.relatedEntityType && (
+                        <span className="notification-entity">
+                          → {notification.relatedEntityType}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                  {hasMore && (
-                    <div className="load-more-section">
+                  <div className="notification-actions">
+                    {!notification.isRead && (
                       <button
-                        className="btn-secondary"
-                        onClick={handleLoadMore}
-                        disabled={loading}
+                        className="btn-icon"
+                        onClick={() => handleMarkAsRead(notification.id)}
+                        title="Mark as read"
                       >
-                        {loading ? "Loading..." : "Load More Notifications"}
+                        ✓
                       </button>
-                    </div>
-                  )}
-                </>
+                    )}
+                    <button
+                      className="btn-icon danger"
+                      onClick={() => handleDeleteNotification(notification.id)}
+                      title="Delete notification"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {hasMore && (
+                <div className="load-more-section">
+                  <button
+                    className="btn-secondary"
+                    onClick={handleLoadMore}
+                    disabled={loading}
+                  >
+                    {loading ? "Loading..." : "Load More Notifications"}
+                  </button>
+                </div>
               )}
+            </>
+          )}
+        </div>
+
+        {isAdmin && (
+          <div className="admin-panel">
+            <h2>🔧 Admin Notification Management</h2>
+            <p>As an admin, you can view and manage notifications for all users.</p>
+            <div className="admin-actions">
+              <button
+                className="btn-secondary"
+                onClick={() => navigate("/admin/users")}
+              >
+                Manage User Notifications
+              </button>
             </div>
-
-            {isAdmin && (
-              <div className="admin-panel">
-                <h2>🔧 Admin Notification Management</h2>
-                <p>As an admin, you can view and manage notifications for all users.</p>
-                <div className="admin-actions">
-                  <button
-                    className="btn-secondary"
-                    onClick={() => navigate("/admin/users")}
-                  >
-                    Manage User Notifications
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isTechnician && (
-              <div className="technician-panel">
-                <h2>🔧 Ticket Notifications</h2>
-                <p>View assigned tickets and ticket updates below.</p>
-                <div className="technician-actions">
-                  <button
-                    className="btn-secondary"
-                    onClick={() => navigate("/tickets")}
-                  >
-                    View My Tickets
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
-        </section>
+        )}
+
+        {isTechnician && (
+          <div className="technician-panel">
+            <h2>🔧 Ticket Notifications</h2>
+            <p>View assigned tickets and ticket updates below.</p>
+            <div className="technician-actions">
+              <button
+                className="btn-secondary"
+                onClick={() => navigate("/tickets")}
+              >
+                View My Tickets
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </section>
+    </OperationsShell>
   );
 }
 

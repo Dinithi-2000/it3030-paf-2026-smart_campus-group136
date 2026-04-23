@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import {
   createFacility,
@@ -7,17 +7,7 @@ import {
   fetchFacilities,
   updateFacility
 } from "../api/facilities";
-
-const navItems = [
-  { label: "Dashboard", to: "/", icon: "dashboard" },
-  { label: "Resources", to: "/facilities", icon: "resources" },
-  { label: "Create Booking", to: "/create-booking", icon: "booking" },
-  { label: "My Bookings", to: "/my-bookings", icon: "booking" },
-  { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
-  { label: "Notifications", to: "/notifications", icon: "notifications" },
-  { label: "Analytics", to: "/admin", icon: "analytics" }
-];
-
+import OperationsShell from "../components/layout/OperationsShell";
 
 const FACILITY_TYPES = ["LECTURE_HALL", "LAB", "MEETING_ROOM", "EQUIPMENT"];
 const FACILITY_STATUSES = ["ACTIVE", "OUT_OF_SERVICE", "MAINTENANCE"];
@@ -266,17 +256,36 @@ function FacilitiesPage() {
     }
   };
 
+  const navItems = isAdmin
+    ? [
+        { label: "Admin Dashboard", to: "/admin-dashboard", icon: "dashboard" },
+        { label: "Resources", to: "/facilities", icon: "resources" },
+        { label: "My Bookings", to: "/my-bookings", icon: "booking" },
+        { label: "Ticketing", to: "/tickets", icon: "ticketing" },
+        { label: "Notifications", to: "/notifications", icon: "notifications" },
+        { label: "Analytics", to: "/admin", icon: "analytics" }
+      ]
+    : [
+        { label: "Dashboard", to: "/", icon: "dashboard" },
+        { label: "Resources", to: "/facilities", icon: "resources" },
+        { label: "Create Booking", to: "/create-booking", icon: "booking" },
+        { label: "My Bookings", to: "/my-bookings", icon: "booking" },
+        { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
+        { label: "Notifications", to: "/notifications", icon: "notifications" },
+        { label: "Analytics", to: "/admin", icon: "analytics" }
+      ];
+
   return (
-    <section className="facility-page">
-      <header className="facility-page-head facility-catalog-head">
-        <div>
-          <h1>Campus Resources</h1>
-          <p>Manage all campus facilities and assets</p>
-        </div>
+    <OperationsShell
+      title="Campus Resources"
+      subtitle="Manage all campus facilities and assets"
+      navItems={navItems}
+    >
+      <div className="facility-page-meta-row">
         <span className="facility-resource-count">
           {displayedFacilities.length} of {facilities.length} resources
         </span>
-      </header>
+      </div>
 
       {error && <div className="facility-alert facility-alert-error">{error}</div>}
       {success && <div className="facility-alert facility-alert-success">{success}</div>}
@@ -495,7 +504,7 @@ function FacilitiesPage() {
       {!isAdmin && (
         <p className="facility-note">Resources are managed by administrators. You can browse all created facilities here.</p>
       )}
-    </section>
+    </OperationsShell>
   );
 }
 

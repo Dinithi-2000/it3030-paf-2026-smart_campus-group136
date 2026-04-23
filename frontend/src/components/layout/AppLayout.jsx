@@ -8,7 +8,8 @@ function AppLayout({ children }) {
     location.pathname === "/admin-dashboard" ||
     location.pathname === "/user-tickets" ||
     location.pathname === "/my-bookings" ||
-    location.pathname === "/create-booking";
+    location.pathname === "/create-booking" ||
+    location.pathname === "/facilities";
   const hideTopNav =
     location.pathname === "/my-bookings" ||
     location.pathname === "/create-booking";

@@ -1,66 +1,17 @@
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import DashboardShell from "../components/layout/DashboardShell";
-
-const metricCards = [
-  { title: "Total Resources", value: "0", hint: "+12% vs LY", icon: "box" },
-  { title: "Active Bookings", value: "0", hint: "Today", icon: "calendar" },
-  { title: "Pending Requests", value: "0", hint: "Awaiting admin", icon: "clock" },
-  { title: "Open Tickets", value: "0", hint: "High priority", icon: "alert" }
-];
-
-const recentActivity = [
-  {
-    time: "10:42 AM",
-    user: "Prof. Sarah Miller",
-    resource: "Lab Room 402",
-    status: "Completed"
-  },
-  {
-    time: "09:15 AM",
-    user: "Maintenance Team A",
-    resource: "HVAC Cluster 9",
-    status: "In Progress"
-  },
-  {
-    time: "08:30 AM",
-    user: "IT Helpdesk",
-    resource: "Server Rack B-12",
-    status: "Delayed"
-  },
-  {
-    time: "08:05 AM",
-    user: "Faculty Admin",
-    resource: "Seminar Hall 2",
-    status: "Approved"
-  }
-];
-
-const resourcePulse = [
-  { label: "Study Spaces", value: 88, tone: "teal" },
-  { label: "Computing Labs", value: 64, tone: "indigo" },
-  { label: "Seminar Rooms", value: 42, tone: "amber" }
-];
+import { fetchTickets } from "../api/tickets";
+import { fetchMyBookings } from "../api/bookings";
+import { notificationService } from "../api/notificationService";
 
 function statusClass(status) {
-  return `status-pill status-${status.toLowerCase().replace(" ", "-")}`;
-}
-
-function navIcon(type) {
-  const icons = {
-    dashboard: "M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 7v-7h7v7h-7Z",
-    resources: "M12 3 3 8l9 5 9-5-9-5Zm-7.5 8.8V16L12 21l7.5-5v-4.2L12 16l-7.5-4.2Z",
-    booking: "M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10Z",
-    ticketing: "M4 7h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5V7Zm9 3h-2v2h2v-2Zm0 4h-2v2h2v-2Z",
-    notifications: "M12 3a6 6 0 0 0-6 6v3.7L4.7 15a1 1 0 0 0 .86 1.5h12.88a1 1 0 0 0 .86-1.5L18 12.7V9a6 6 0 0 0-6-6Zm0 18a2.4 2.4 0 0 0 2.3-1.8H9.7A2.4 2.4 0 0 0 12 21Z",
-    analytics: "M5 21h14v-2H5v2Zm1-4h2V9H6v8Zm5 0h2V5h-2v12Zm5 0h2v-6h-2v6Z"
-  };
-
-  return (
-    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-      <path d={icons[type]} fill="currentColor" />
-    </svg>
-  );
+  const s = String(status || "").toLowerCase();
+  if (s.includes("approved") || s.includes("completed") || s.includes("resolved")) return "status-pill status-approved";
+  if (s.includes("pending") || s.includes("in progress")) return "status-pill status-in-progress";
+  if (s.includes("rejected") || s.includes("critical") || s.includes("escalated")) return "status-pill status-rejected";
+  return "status-pill status-default";
 }
 
 function metricIcon(type) {
@@ -79,19 +30,81 @@ function metricIcon(type) {
 }
 
 function DashboardPage() {
-  const { user, roles, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const [metrics, setMetrics] = useState({
+    totalBookings: 0,
+    activeBookings: 0,
+    pendingRequests: 0,
+    openTickets: 0
+  });
+
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      setLoading(true);
+      try {
+        // 1. Fetch User Tickets
+        const tickets = await fetchTickets();
+        const openTicketsCount = tickets.filter(t => t.status === "OPEN" || t.status === "IN_PROGRESS").length;
+
+        // 2. Fetch User Bookings
+        const bookingRes = await fetchMyBookings();
+        const myBookings = bookingRes.data || [];
+        const activeCount = myBookings.filter(b => b.status === "APPROVED").length;
+        const pendingCount = myBookings.filter(b => b.status === "PENDING").length;
+
+        // 3. Fetch Recent Activity (Notifications)
+        const notifRes = await notificationService.getNotifications(0, 5);
+        const latestActivities = (notifRes.content || []).map(n => ({
+          time: new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          user: user?.displayName || user?.username || "Me",
+          resource: n.title,
+          status: n.type.replace('_', ' ')
+        }));
+
+        setMetrics({
+          totalBookings: myBookings.length,
+          activeBookings: activeCount,
+          pendingRequests: pendingCount,
+          openTickets: openTicketsCount
+        });
+
+        setActivities(latestActivities);
+
+      } catch (error) {
+        console.error("Dashboard load failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const metricCards = [
+    { title: "Total Bookings", value: metrics.totalBookings, hint: "All time", icon: "box" },
+    { title: "Active Bookings", value: metrics.activeBookings, hint: "Approved", icon: "calendar" },
+    { title: "Pending Requests", value: metrics.pendingRequests, hint: "Awaiting admin", icon: "clock" },
+    { title: "Open Tickets", value: metrics.openTickets, hint: "In progress", icon: "alert" }
+  ];
+
+  const resourcePulse = [
+    { label: "Study Spaces", value: 88, tone: "teal" },
+    { label: "Computing Labs", value: 64, tone: "indigo" },
+    { label: "Seminar Rooms", value: 42, tone: "amber" }
+  ];
 
   return (
     <DashboardShell>
         <section className="ops-content">
-          <h1>System Overview</h1>
-          <p className="ops-subtitle">Operational status for North Campus Precinct.</p>
+          <h1>My Dashboard</h1>
+          <p className="ops-subtitle">Personal operational overview and recent activity.</p>
 
           <div className="ops-metrics">
             {metricCards.map((card) => (
@@ -101,7 +114,7 @@ function DashboardPage() {
                   <span>{card.hint}</span>
                 </div>
                 <p>{card.title}</p>
-                <h3>{card.value}</h3>
+                <h3>{loading ? "..." : String(card.value).padStart(2, '0')}</h3>
               </article>
             ))}
           </div>
@@ -110,25 +123,25 @@ function DashboardPage() {
             <article className="ops-panel">
               <div className="ops-panel-head">
                 <h2>Recent Activity</h2>
-                <button type="button">Export Logs</button>
+                <button type="button" onClick={() => navigate("/notifications")}>View All</button>
               </div>
               <div className="ops-table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Timestamp</th>
+                      <th>Time</th>
                       <th>User</th>
-                      <th>Resource</th>
-                      <th>Status</th>
+                      <th>Event</th>
+                      <th>Type</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {recentActivity.map((item) => (
-                      <tr key={`${item.time}-${item.user}`}>
+                    {activities.length > 0 ? activities.map((item, idx) => (
+                      <tr key={idx}>
                         <td>{item.time}</td>
                         <td>
                           <span className="user-cell">
-                            <span className="user-badge">{item.user.charAt(0)}</span>
+                            <span className="user-badge">{item.user.charAt(0).toUpperCase()}</span>
                             {item.user}
                           </span>
                         </td>
@@ -137,7 +150,13 @@ function DashboardPage() {
                           <span className={statusClass(item.status)}>{item.status}</span>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>
+                          {loading ? "Loading activity..." : "No recent activity found"}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -145,7 +164,7 @@ function DashboardPage() {
 
             <article className="ops-panel pulse-panel">
               <div className="ops-panel-head">
-                <h2>Resource Pulse</h2>
+                <h2>Campus Resource Pulse</h2>
               </div>
               <div className="pulse-list">
                 {resourcePulse.map((item) => (

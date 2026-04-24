@@ -1,7 +1,7 @@
-// Author: Member 2 - Booking Management Module
 import { useEffect, useMemo, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import DashboardShell from "../components/layout/DashboardShell";
 import {
   createBooking,
   deleteBooking,
@@ -10,7 +10,6 @@ import {
   updateBookingStatus
 } from "../api/bookings";
 import "./BookingsPage.css";
-
 const INITIAL_FORM = {
   resourceId: "",
   startTime: "",
@@ -34,34 +33,6 @@ const STATUS_ORDER = {
   REJECTED: 2,
   CANCELLED: 3
 };
-
-const baseNavItems = [
-  { label: "Dashboard",      to: "/dashboard",        icon: "dashboard" },
-  { label: "Resources", to: "/facilities", icon: "resources" },
-  { label: "My Bookings", to: "/my-bookings", icon: "booking" },
-  { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
-  { label: "Notifications", to: "/notifications", icon: "notifications" },
-  { label: "Analytics", to: "/analytics", icon: "analytics" }
-];
-
-function navIcon(type) {
-  const icons = {
-    dashboard: "M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 7v-7h7v7h-7Z",
-    resources: "M12 3 3 8l9 5 9-5-9-5Zm-7.5 8.8V16L12 21l7.5-5v-4.2L12 16l-7.5-4.2Z",
-    booking: "M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10Z",
-    ledger: "M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2 3v2h10V7H7Zm0 4v2h10v-2H7Zm0 4v2h6v-2H7Z",
-    create: "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z",
-    ticketing: "M4 7h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5V7Zm9 3h-2v2h2v-2Zm0 4h-2v2h2v-2Z",
-    notifications: "M12 3a6 6 0 0 0-6 6v3.7L4.7 15a1 1 0 0 0 .86 1.5h12.88a1 1 0 0 0 .86-1.5L18 12.7V9a6 6 0 0 0-6-6Zm0 18a2.4 2.4 0 0 0 2.3-1.8H9.7A2.4 2.4 0 0 0 12 21Z",
-    analytics: "M5 21h14v-2H5v2Zm1-4h2V9H6v8Zm5 0h2V5h-2v12Zm5 0h2v-6h-2v6Z"
-  };
-
-  return (
-    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-      <path d={icons[type]} fill="currentColor" />
-    </svg>
-  );
-}
 
 function normalize(value) {
   return String(value || "").trim().toLowerCase();
@@ -168,16 +139,7 @@ function BookingsPage({ mode = "my" }) {
   const isLegacyStudentMyView = !isAdmin && mode === "my";
   const showCreatePanel = isCreateView || isLegacyStudentMyView;
   const useSingleColumnGrid = showCreatePanel || isAdminReviewView;
-  const navItems = !isAdmin
-    ? baseNavItems.flatMap((item) =>
-        item.to === "/my-bookings"
-          ? [
-              { label: "Create Booking", to: "/create-booking", icon: "create" },
-              { label: "My Bookings", to: "/my-bookings", icon: "booking" }
-            ]
-          : [item]
-      )
-    : baseNavItems;
+
   const currentUserId = user?.id || user?.username || "";
   const roleLabel = isAdmin
     ? "Admin"
@@ -467,69 +429,11 @@ function BookingsPage({ mode = "my" }) {
     submitting || !form.resourceId.trim() || !form.startTime || !form.endTime || !form.purpose.trim() || draftConflicts.length > 0;
 
   return (
-    <section className="ops-shell booking-shell">
-      <aside className="ops-sidebar">
-        <div className="ops-brand">
-          <div className="ops-logo">SC</div>
-          <div>
-            <h2>Operations Hub</h2>
-            <p>INTELLIGENT OBSERVATORIUM</p>
-          </div>
-        </div>
-
-        <nav className="ops-menu" aria-label="Dashboard navigation">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/dashboard"}
-              className={({ isActive }) =>
-                `ops-menu-link${isActive ? " ops-menu-link-active" : ""}`
-              }
-            >
-              <span className="menu-link-content">
-                {navIcon(item.icon)}
-                <span>{item.label}</span>
-              </span>
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="ops-sidebar-foot">
-          <button type="button">
-            <span className="foot-icon">?</span>
-            Support
-          </button>
-          <button type="button">
-            <span className="foot-icon">*</span>
-            Settings
-          </button>
-          <button type="button" className="danger" onClick={handleLogout}>
-            <span className="foot-icon">&rarr;</span>
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
-      <div className="ops-main">
-        <header className="ops-topbar">
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Global booking search..."
-          />
-          <div className="ops-top-actions">
-            <div className="ops-user">
-              <div>
-                <strong>{user?.displayName || user?.username || "Campus User"}</strong>
-                <span>{roles?.[0] || "USER"}</span>
-              </div>
-              <div className="avatar">{(user?.displayName || user?.username || "U").charAt(0).toUpperCase()}</div>
-            </div>
-          </div>
-        </header>
-
+    <DashboardShell
+      searchPlaceholder="Global booking search..."
+      searchValue={searchTerm}
+      onSearchChange={(e) => setSearchTerm(e.target.value)}
+    >
         <section className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""} ${isStudentBookingsView ? "min-h-screen rounded-3xl bg-slate-50 p-4 md:p-6" : ""}`}>
           {isStudentBookingsView ? (
             <header ref={formRef} className="mb-6 space-y-4">
@@ -1075,8 +979,7 @@ function BookingsPage({ mode = "my" }) {
         </div>
       ) : null}
         </section>
-      </div>
-    </section>
+    </DashboardShell>
   );
 }
 

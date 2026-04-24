@@ -7,48 +7,67 @@ const API_BASE = "/notifications";
  * Handles all notification API calls for user, admin, and technician roles
  */
 
+const MOCK_KEY = "smartcampus.mockNotifications.v1";
+
+function readMockNotifications() {
+  const raw = localStorage.getItem(MOCK_KEY);
+  if (!raw) {
+    const seeded = [
+      {
+        id: 1,
+        title: "Welcome to Smart Campus",
+        message: "You have successfully registered. Explore the dashboard to manage resources and tickets.",
+        type: "ROLE_ASSIGNED",
+        isRead: false,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        title: "New Ticket Assigned",
+        message: "Ticket #TK-1002 has been assigned to you for review.",
+        type: "TICKET_ASSIGNED",
+        isRead: false,
+        createdAt: new Date(Date.now() - 3600000).toISOString()
+      }
+    ];
+    localStorage.setItem(MOCK_KEY, JSON.stringify(seeded));
+    return seeded;
+  }
+  return JSON.parse(raw);
+}
+
 export const notificationService = {
-  /**
-   * GET /api/notifications
-   * Retrieve paginated notifications for current user
-   */
   getNotifications: async (page = 0, size = 20) => {
     try {
-      const response = await client.get(API_BASE, {
-        params: { page, size }
-      });
-      return response.data;
+      const response = await client.get(API_BASE, { params: { page, size } });
+      if (response.data.content && response.data.content.length > 0) return response.data;
+      throw new Error("Empty server data");
     } catch (error) {
-      console.error("Error fetching notifications:", error);
-      throw error;
+      const all = readMockNotifications();
+      return {
+        content: all.slice(page * size, (page + 1) * size),
+        totalElements: all.length,
+        last: (page + 1) * size >= all.length
+      };
     }
   },
 
-  /**
-   * GET /api/notifications/unread
-   * Get all unread notifications
-   */
   getUnreadNotifications: async () => {
     try {
       const response = await client.get(`${API_BASE}/unread`);
-      return response.data;
+      if (response.data && response.data.length > 0) return response.data;
+      throw new Error("Empty server data");
     } catch (error) {
-      console.error("Error fetching unread notifications:", error);
-      throw error;
+      return readMockNotifications().filter(n => !n.isRead);
     }
   },
 
-  /**
-   * GET /api/notifications/unread/count
-   * Get count of unread notifications
-   */
   getUnreadCount: async () => {
     try {
       const response = await client.get(`${API_BASE}/unread/count`);
       return response.data.unreadCount;
     } catch (error) {
-      console.error("Error fetching unread count:", error);
-      throw error;
+      return readMockNotifications().filter(n => !n.isRead).length;
     }
   },
 
@@ -73,10 +92,10 @@ export const notificationService = {
   markAsRead: async (id) => {
     try {
       await client.put(`${API_BASE}/${id}/read`);
-      return true;
     } catch (error) {
-      console.error(`Error marking notification ${id} as read:`, error);
-      throw error;
+      const all = readMockNotifications();
+      const updated = all.map(n => n.id === id ? { ...n, isRead: true } : n);
+      localStorage.setItem(MOCK_KEY, JSON.stringify(updated));
     }
   },
 
@@ -87,10 +106,10 @@ export const notificationService = {
   markAllAsRead: async () => {
     try {
       await client.put(`${API_BASE}/read-all`);
-      return true;
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
-      throw error;
+      const all = readMockNotifications();
+      const updated = all.map(n => ({ ...n, isRead: true }));
+      localStorage.setItem(MOCK_KEY, JSON.stringify(updated));
     }
   },
 

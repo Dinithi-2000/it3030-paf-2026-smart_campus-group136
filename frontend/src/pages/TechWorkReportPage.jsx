@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { fetchTickets } from "../api/tickets";
-import TechSidebar from "../components/TechSidebar";
+import DashboardShell from "../components/layout/DashboardShell";
+
 
 const PRIORITY_COLOR = {
   LOW: "#22c55e",
@@ -33,7 +34,7 @@ function calcDuration(createdAt, updatedAt) {
 
 export default function TechWorkReportPage() {
   const { user, roles } = useAuth();
-  const actorId   = user?.id   || user?.username || "";
+  const actorId = user?.id || user?.username || "";
   const actorName = user?.displayName || user?.username || "";
 
   const [allTickets, setAllTickets] = useState([]);
@@ -62,11 +63,11 @@ export default function TechWorkReportPage() {
   );
 
   // KPI stats
-  const total      = myTickets.length;
-  const resolved   = myTickets.filter(t => t.status === "RESOLVED" || t.status === "CLOSED").length;
+  const total = myTickets.length;
+  const resolved = myTickets.filter(t => t.status === "RESOLVED" || t.status === "CLOSED").length;
   const inProgress = myTickets.filter(t => t.status === "IN_PROGRESS").length;
-  const open       = myTickets.filter(t => t.status === "OPEN").length;
-  const critical   = myTickets.filter(t => t.priority === "CRITICAL").length;
+  const open = myTickets.filter(t => t.status === "OPEN").length;
+  const critical = myTickets.filter(t => t.priority === "CRITICAL").length;
   const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
   // Priority breakdown
@@ -89,25 +90,7 @@ export default function TechWorkReportPage() {
   const resolved_tickets = myTickets.filter(t => t.status === "RESOLVED" || t.status === "CLOSED");
 
   return (
-    <section className="ops-shell">
-      <TechSidebar />
-
-      <div className="ops-main">
-        <header className="ops-topbar">
-          <input type="search" placeholder="Search work report..." />
-          <div className="ops-top-actions">
-            <div className="ops-user">
-              <div>
-                <strong>{actorName || "Technician"}</strong>
-                <span>{roles?.[0] || "TECHNICIAN"}</span>
-              </div>
-              <div className="avatar tech-avatar">
-                {(actorName || "T").charAt(0).toUpperCase()}
-              </div>
-            </div>
-          </div>
-        </header>
-
+    <DashboardShell>
         <section className="ops-content">
           {/* Page Header */}
           <div className="ticket-page-head">
@@ -298,7 +281,7 @@ export default function TechWorkReportPage() {
             </>
           )}
         </section>
-      </div>
-    </section>
+    </DashboardShell>
   );
 }
+

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import DashboardShell from "../components/layout/DashboardShell";
 import {
   addComment,
   assignTechnician,
@@ -21,15 +22,6 @@ const STATUS_FLOW = {
 
 const ALL_STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"];
 const PRIORITY_COLORS = { LOW: "#22c55e", MEDIUM: "#f59e0b", HIGH: "#ef4444", CRITICAL: "#7c3aed" };
-
-const navItems = [
-  { label: "Dashboard", to: "/admin-dashboard", icon: "M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 7v-7h7v7h-7Z" },
-  { label: "Resources", to: "/facilities", icon: "M12 3 3 8l9 5 9-5-9-5Zm-7.5 8.8V16L12 21l7.5-5v-4.2L12 16l-7.5-4.2Z" },
-  { label: "My Bookings", to: "/my-bookings", icon: "M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm11 8H6v10h12V10Z" },
-  { label: "Ticketing", to: "/tickets", icon: "M4 7h16v4a2.5 2.5 0 0 0 0 5v4H4v-4a2.5 2.5 0 0 0 0-5V7Zm9 3h-2v2h2v-2Zm0 4h-2v2h2v-2Z" },
-  { label: "Notifications", to: "/notifications", icon: "M12 3a6 6 0 0 0-6 6v3.7L4.7 15a1 1 0 0 0 .86 1.5h12.88a1 1 0 0 0 .86-1.5L18 12.7V9a6 6 0 0 0-6-6Zm0 18a2.4 2.4 0 0 0 2.3-1.8H9.7A2.4 2.4 0 0 0 12 21Z" },
-  { label: "Analytics", to: "/analytics", icon: "M5 21h14v-2H5v2Zm1-4h2V9H6v8Zm5 0h2V5h-2v12Zm5 0h2v-6h-2v6Z" }
-];
 
 function prettyDate(v) {
   if (!v) return "-";
@@ -211,70 +203,8 @@ function AdminTicketsPage() {
   };
 
   return (
-    <section className="ops-shell">
-      {/* ── Sidebar ── */}
-      <aside className="ops-sidebar">
-        <div className="ops-brand">
-          <div className="ops-logo">SC</div>
-          <div>
-            <h2>Operations Hub</h2>
-            <p>ADMIN CONSOLE</p>
-          </div>
-        </div>
-
-        <nav className="ops-menu" aria-label="Admin navigation">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) => `ops-menu-link${isActive ? " ops-menu-link-active" : ""}`}
-            >
-              <span className="menu-link-content">
-                <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                  <path d={item.icon} fill="currentColor" />
-                </svg>
-                <span>{item.label}</span>
-              </span>
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="ops-sidebar-foot">
-          <button type="button"><span className="foot-icon">?</span>Support</button>
-          <button type="button"><span className="foot-icon">*</span>Settings</button>
-          <button type="button" className="danger" onClick={handleLogout}>
-            <span className="foot-icon">&rarr;</span>Sign Out
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main ── */}
-      <div className="ops-main">
-        <header className="ops-topbar">
-          <input type="search" placeholder="Global system search..." />
-          <div className="ops-top-actions">
-            <button type="button" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
-                <path d="M12 3a6 6 0 0 0-6 6v3.6l-1.4 2.3a1 1 0 0 0 .86 1.51h13.08a1 1 0 0 0 .86-1.51L18 12.6V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" fill="currentColor" />
-              </svg>
-            </button>
-            <button type="button" aria-label="Quick logout" className="logout-soft" onClick={handleLogout}>
-              <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
-                <path d="M10 4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-8a1 1 0 1 1 0-2h7V5h-7a1 1 0 0 1-1-1ZM13.7 12.7a1 1 0 0 0 0-1.4l-2-2a1 1 0 1 0-1.4 1.4L10.59 11H4a1 1 0 1 0 0 2h6.59l-.29.29a1 1 0 1 0 1.4 1.42l2-2.01Z" fill="currentColor" />
-              </svg>
-            </button>
-            <div className="ops-user">
-              <div>
-                <strong>{user?.displayName || user?.username || "Admin"}</strong>
-                <span>{roles?.[0] || "ADMIN"}</span>
-              </div>
-              <div className="avatar">{(user?.displayName || user?.username || "A").charAt(0).toUpperCase()}</div>
-            </div>
-          </div>
-        </header>
-
-        <section className="ops-content">
+    <DashboardShell>
+      <section className="ops-content">
           <section className="ticket-workspace ticketing-v2">
 
             {/* ── Page header ── */}
@@ -624,8 +554,7 @@ function AdminTicketsPage() {
             </div>
           </section>
         </section>
-      </div>
-    </section>
+    </DashboardShell>
   );
 }
 

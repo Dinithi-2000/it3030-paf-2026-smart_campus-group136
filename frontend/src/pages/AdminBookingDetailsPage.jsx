@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchAllBookings } from "../api/bookings";
+import DashboardShell from "../components/layout/DashboardShell";
 import "./BookingsPage.css";
 
 const STATUS_LABELS = {
@@ -51,75 +52,77 @@ function AdminBookingDetailsPage() {
   );
 
   return (
-    <section className="page">
-      <main className="card">
-        <article className="ops-panel booking-card booking-detail-panel booking-detail-panel-admin">
-          <div className="ops-panel-head">
-            <h2>Booking Details</h2>
-            <button type="button" onClick={() => navigate("/my-bookings")}>
-              Back to All Bookings
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="booking-empty booking-empty-compact booking-loading">
-              <div className="booking-spinner" />
-              <p>Loading booking details...</p>
+    <DashboardShell>
+      <section className="page">
+        <main className="card">
+          <article className="ops-panel booking-card booking-detail-panel booking-detail-panel-admin">
+            <div className="ops-panel-head">
+              <h2>Booking Details</h2>
+              <button type="button" onClick={() => navigate("/my-bookings")}>
+                Back to All Bookings
+              </button>
             </div>
-          ) : error ? (
-            <div className="booking-alert booking-alert-error">{error}</div>
-          ) : !booking ? (
-            <div className="booking-empty booking-empty-compact">
-              <p className="booking-empty-title">Booking not found</p>
-              <p className="booking-empty-text">This booking may have been deleted or is no longer available.</p>
-            </div>
-          ) : (
-            <div className="booking-detail-grid">
-              <div className="booking-detail-main">
-                <div className="booking-detail-header">
-                  <div>
-                    <p className="booking-detail-kicker">{booking.resourceId}</p>
-                    <h3>{booking.purpose}</h3>
-                  </div>
-                  <span className={bookingStatusClass(booking.status)}>
-                    {STATUS_LABELS[booking.status] || booking.status}
-                  </span>
-                </div>
 
-                <div className="booking-detail-meta">
-                  <div>
-                    <span>Booking ID</span>
-                    <strong>{booking.id}</strong>
-                  </div>
-                  <div>
-                    <span>Requester</span>
-                    <strong>{booking.userId}</strong>
-                  </div>
-                  <div>
-                    <span>Time</span>
-                    <strong>{formatDateTime(booking.startTime)} - {formatDateTime(booking.endTime)}</strong>
-                  </div>
-                  <div>
-                    <span>Attendees</span>
-                    <strong>{booking.expectedAttendees ?? "-"}</strong>
-                  </div>
-                  <div>
-                    <span>Created</span>
-                    <strong>{formatDateTime(booking.createdAt)}</strong>
-                  </div>
-                </div>
-
-                {booking.rejectionReason ? (
-                  <div className="booking-detail-note booking-detail-note-error">
-                    <strong>Rejection reason:</strong> {booking.rejectionReason}
-                  </div>
-                ) : null}
+            {loading ? (
+              <div className="booking-empty booking-empty-compact booking-loading">
+                <div className="booking-spinner" />
+                <p>Loading booking details...</p>
               </div>
-            </div>
-          )}
-        </article>
-      </main>
-    </section>
+            ) : error ? (
+              <div className="booking-alert booking-alert-error">{error}</div>
+            ) : !booking ? (
+              <div className="booking-empty booking-empty-compact">
+                <p className="booking-empty-title">Booking not found</p>
+                <p className="booking-empty-text">This booking may have been deleted or is no longer available.</p>
+              </div>
+            ) : (
+              <div className="booking-detail-grid">
+                <div className="booking-detail-main">
+                  <div className="booking-detail-header">
+                    <div>
+                      <p className="booking-detail-kicker">{booking.resourceId}</p>
+                      <h3>{booking.purpose}</h3>
+                    </div>
+                    <span className={bookingStatusClass(booking.status)}>
+                      {STATUS_LABELS[booking.status] || booking.status}
+                    </span>
+                  </div>
+
+                  <div className="booking-detail-meta">
+                    <div>
+                      <span>Booking ID</span>
+                      <strong>{booking.id}</strong>
+                    </div>
+                    <div>
+                      <span>Requester</span>
+                      <strong>{booking.userId}</strong>
+                    </div>
+                    <div>
+                      <span>Time</span>
+                      <strong>{formatDateTime(booking.startTime)} - {formatDateTime(booking.endTime)}</strong>
+                    </div>
+                    <div>
+                      <span>Attendees</span>
+                      <strong>{booking.expectedAttendees ?? "-"}</strong>
+                    </div>
+                    <div>
+                      <span>Created</span>
+                      <strong>{formatDateTime(booking.createdAt)}</strong>
+                    </div>
+                  </div>
+
+                  {booking.rejectionReason ? (
+                    <div className="booking-detail-note booking-detail-note-error">
+                      <strong>Rejection reason:</strong> {booking.rejectionReason}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </article>
+        </main>
+      </section>
+    </DashboardShell>
   );
 }
 

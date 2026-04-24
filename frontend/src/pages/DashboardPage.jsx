@@ -1,16 +1,6 @@
-import { NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-
-const navItems = [
-  { label: "Dashboard", to: "/", icon: "dashboard" },
-  { label: "Resources", to: "/facilities", icon: "resources" },
-  { label: "Create Booking", to: "/create-booking", icon: "booking" },
-  { label: "My Bookings", to: "/my-bookings", icon: "booking" },
-  { label: "Ticketing", to: "/user-tickets", icon: "ticketing" },
-  { label: "Notifications", to: "/notifications", icon: "notifications" },
-  { label: "Analytics", to: "/analytics", icon: "analytics" }
-];
+import DashboardShell from "../components/layout/DashboardShell";
 
 const metricCards = [
   { title: "Total Resources", value: "0", hint: "+12% vs LY", icon: "box" },
@@ -98,85 +88,7 @@ function DashboardPage() {
   };
 
   return (
-    <section className="ops-shell">
-      <aside className="ops-sidebar">
-        <div className="ops-brand">
-          <div className="ops-logo">SC</div>
-          <div>
-            <h2>Operations Hub</h2>
-            <p>INTELLIGENT OBSERVATORIUM</p>
-          </div>
-        </div>
-
-        <nav className="ops-menu" aria-label="Dashboard navigation">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) =>
-                `ops-menu-link${isActive ? " ops-menu-link-active" : ""}`
-              }
-            >
-              <span className="menu-link-content">
-                {navIcon(item.icon)}
-                <span>{item.label}</span>
-              </span>
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="ops-sidebar-foot">
-          <button type="button">
-            <span className="foot-icon">?</span>
-            Support
-          </button>
-          <button type="button">
-            <span className="foot-icon">*</span>
-            Settings
-          </button>
-          <button type="button" className="danger" onClick={handleLogout}>
-            <span className="foot-icon">&rarr;</span>
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
-      <div className="ops-main">
-        <header className="ops-topbar">
-          <input type="search" placeholder="Global system search..." />
-          <div className="ops-top-actions">
-            <button type="button" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
-                <path
-                  d="M12 3a6 6 0 0 0-6 6v3.6l-1.4 2.3a1 1 0 0 0 .86 1.51h13.08a1 1 0 0 0 .86-1.51L18 12.6V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Quick logout"
-              className="logout-soft"
-              onClick={handleLogout}
-            >
-              <svg viewBox="0 0 24 24" className="ops-icon" aria-hidden="true">
-                <path
-                  d="M10 4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-8a1 1 0 1 1 0-2h7V5h-7a1 1 0 0 1-1-1ZM13.7 12.7a1 1 0 0 0 0-1.4l-2-2a1 1 0 1 0-1.4 1.4L10.59 11H4a1 1 0 1 0 0 2h6.59l-.29.29a1 1 0 1 0 1.4 1.42l2-2.01Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </button>
-            <div className="ops-user">
-              <div>
-                <strong>{user?.displayName || user?.username || "Campus User"}</strong>
-                <span>{roles?.[0] || "USER"}</span>
-              </div>
-              <div className="avatar">{(user?.displayName || user?.username || "U").charAt(0).toUpperCase()}</div>
-            </div>
-          </div>
-        </header>
-
+    <DashboardShell>
         <section className="ops-content">
           <h1>System Overview</h1>
           <p className="ops-subtitle">Operational status for North Campus Precinct.</p>
@@ -254,8 +166,7 @@ function DashboardPage() {
             </article>
           </div>
         </section>
-      </div>
-    </section>
+    </DashboardShell>
   );
 }
 

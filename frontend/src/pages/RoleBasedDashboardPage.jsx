@@ -2,7 +2,7 @@ import { useAuth } from "../auth/AuthContext";
 import AdminDashboardPage from "./AdminDashboardPage";
 import TechnicianDashboardPage from "./TechnicianDashboardPage";
 import DashboardPage from "./DashboardPage";
-import AppLayout from "../components/layout/AppLayout";
+
 
 function RoleBasedDashboardPage() {
   const { hasRole } = useAuth();
@@ -11,12 +11,8 @@ function RoleBasedDashboardPage() {
   if (hasRole("ADMIN"))       return <AdminDashboardPage />;
   if (hasRole("TECHNICIAN"))  return <TechnicianDashboardPage />;
 
-  // Regular users get the standard dashboard wrapped in AppLayout
-  return (
-    <AppLayout>
-      <DashboardPage />
-    </AppLayout>
-  );
+  // Regular users get the standard dashboard (which now has its own DashboardShell)
+  return <DashboardPage />;
 }
 
 export default RoleBasedDashboardPage;

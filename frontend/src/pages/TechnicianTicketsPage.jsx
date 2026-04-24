@@ -8,7 +8,7 @@ import {
   updateComment,
   updateTicketStatus
 } from "../api/tickets";
-import TechSidebar from "../components/TechSidebar";
+import DashboardShell from "../components/layout/DashboardShell";
 
 
 const STATUS_FLOW = {
@@ -182,24 +182,11 @@ export default function TechnicianTicketsPage() {
 
   /* ── render ── */
   return (
-    <section className="ops-shell">
-      <TechSidebar />
-
-      {/* ── Main ── */}
-      <div className="ops-main">
-        <header className="ops-topbar">
-          <input type="search" placeholder="Global search..." />
-          <div className="ops-top-actions">
-            <div className="ops-user">
-              <div>
-                <strong>{actorName || "Technician"}</strong>
-                <span>{roles?.[0] || "TECHNICIAN"}</span>
-              </div>
-              <div className="avatar">{(actorName || "T").charAt(0).toUpperCase()}</div>
-            </div>
-          </div>
-        </header>
-
+    <DashboardShell
+      searchPlaceholder="Search tickets by ID, category, reporter..."
+      searchValue={searchTerm}
+      onSearchChange={setSearchTerm}
+    >
         <section className="ops-content">
           {/* Page head */}
           <div className="ticket-page-head">
@@ -495,7 +482,6 @@ export default function TechnicianTicketsPage() {
             </aside>
           </div>
         </section>
-      </div>
-    </section>
+    </DashboardShell>
   );
 }

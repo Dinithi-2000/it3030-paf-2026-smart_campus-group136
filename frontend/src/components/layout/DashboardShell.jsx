@@ -1,20 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+import NotificationBell from "../NotificationBell";
 
 const navItems = {
   ADMIN: [
     { label: "Admin Dashboard", to: "/admin-dashboard", icon: "dashboard" },
-    { label: "Resources", to: "/facilities", icon: "resources" },
-    { label: "Manage Bookings", to: "/my-bookings", icon: "booking" },
-    { label: "Ticketing", to: "/tickets", icon: "ticketing" },
-    { label: "Notifications", to: "/notifications", icon: "notifications" },
-    { label: "Analytics", to: "/analytics", icon: "analytics" }
+    { label: "Resources Management", to: "/facilities", icon: "resources" },
+    { label: "Booking Management", to: "/manage-bookings", icon: "booking" },
+    { label: "Ticketing Management", to: "/tickets", icon: "ticketing" },
+    { label: "Reports", to: "/admin-report", icon: "analytics" },
+    { label: "Notifications", to: "/notifications", icon: "notifications" }
   ],
   TECHNICIAN: [
-    { label: "Dashboard",   to: "/tech-dashboard",   icon: "dashboard" },
-    { label: "Tickets",     to: "/tech-tickets",     icon: "ticketing" },
-    { label: "Resources",   to: "/facilities",       icon: "resources" },
-    { label: "Bookings",    to: "/my-bookings",      icon: "booking" },
+    { label: "Dashboard", to: "/tech-dashboard", icon: "dashboard" },
+    { label: "Tickets", to: "/tech-tickets", icon: "ticketing" },
+
     { label: "Work Report", to: "/tech-work-report", icon: "analytics" }
   ],
   USER: [
@@ -45,7 +45,7 @@ function navIcon(type) {
   );
 }
 
-export default function DashboardShell({ children }) {
+export default function DashboardShell({ children, searchPlaceholder = "Search system resources...", searchValue, onSearchChange }) {
   const { user, roles, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -104,8 +104,23 @@ export default function DashboardShell({ children }) {
 
       <div className="ops-main">
         <header className="ops-topbar">
-          <input type="search" placeholder="Search system resources..." />
+          <input
+            type="search"
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={(e) => {
+              if (typeof onSearchChange === "function") {
+                // Support both direct value (setter) and event handler
+                try {
+                  onSearchChange(e.target.value);
+                } catch {
+                  onSearchChange(e);
+                }
+              }
+            }}
+          />
           <div className="ops-top-actions">
+            <NotificationBell />
             <div className="ops-user">
               <div>
                 <strong>{user?.displayName || user?.username || "Campus User"}</strong>

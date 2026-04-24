@@ -333,6 +333,9 @@ export async function deleteComment(ticketId, commentId) {
 }
 
 export async function assignTechnician(ticketId, body) {
+  if (String(ticketId).startsWith("TK-")) {
+    throw new Error("This ticket is stored locally and cannot be assigned on the server. Please wait for synchronization.");
+  }
   const response = await client.put(`/tickets/${ticketId}/assignment`, body, {
     headers: actorHeaders()
   });
@@ -340,6 +343,9 @@ export async function assignTechnician(ticketId, body) {
 }
 
 export async function updateTicketStatus(ticketId, body) {
+  if (String(ticketId).startsWith("TK-")) {
+    throw new Error("This ticket is stored locally and cannot be updated on the server. Please wait for synchronization.");
+  }
   const response = await client.patch(`/tickets/${ticketId}/status`, body, {
     headers: actorHeaders()
   });

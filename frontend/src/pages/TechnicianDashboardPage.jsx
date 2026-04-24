@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { fetchTickets } from "../api/tickets";
-import TechSidebar from "../components/TechSidebar";
+import DashboardShell from "../components/layout/DashboardShell";
 
 const PRIORITY_COLOR = {
   LOW:      { bg: "#dcfce7", text: "#15803d", dot: "#22c55e" },
@@ -109,26 +109,7 @@ export default function TechnicianDashboardPage() {
   );
 
   return (
-    <section className="ops-shell">
-      <TechSidebar />
-
-      <div className="ops-main">
-        {/* Top bar */}
-        <header className="ops-topbar">
-          <input type="search" placeholder="Search tickets..." />
-          <div className="ops-top-actions">
-            <div className="ops-user">
-              <div>
-                <strong>{actorName || "Technician"}</strong>
-                <span>{roles?.[0] || "TECHNICIAN"}</span>
-              </div>
-              <div className="avatar tech-avatar">
-                {(actorName || "T").charAt(0).toUpperCase()}
-              </div>
-            </div>
-          </div>
-        </header>
-
+    <DashboardShell searchPlaceholder="Search tickets...">
         <section className="ops-content">
           {/* ── Hero Header ── */}
           <div style={{
@@ -441,7 +422,6 @@ export default function TechnicianDashboardPage() {
           </div>
 
         </section>
-      </div>
-    </section>
+    </DashboardShell>
   );
 }

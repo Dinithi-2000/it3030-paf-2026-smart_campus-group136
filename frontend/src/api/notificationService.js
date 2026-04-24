@@ -7,33 +7,149 @@ const API_BASE = "/notifications";
  * Handles all notification API calls for user, admin, and technician roles
  */
 
-const MOCK_KEY = "smartcampus.mockNotifications.v1";
+const MOCK_KEY = "smartcampus.mockNotifications.v2";
+
+function currentRole() {
+  try {
+    const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+    return Array.isArray(roles) && roles.length > 0 ? roles[0] : "USER";
+  } catch {
+    return "USER";
+  }
+}
 
 function readMockNotifications() {
+  const role = currentRole();
   const raw = localStorage.getItem(MOCK_KEY);
   if (!raw) {
     const seeded = [
+      // --- ADMIN NOTIFICATIONS ---
       {
-        id: 1,
-        title: "Welcome to Smart Campus",
-        message: "You have successfully registered. Explore the dashboard to manage resources and tickets.",
+        id: 101,
+        title: "System Update Complete",
+        message: "Smart Campus v2.4 is now live. New administrative reports available.",
         type: "ROLE_ASSIGNED",
+        role: "ADMIN",
         isRead: false,
         createdAt: new Date().toISOString()
       },
       {
-        id: 2,
-        title: "New Ticket Assigned",
-        message: "Ticket #TK-1002 has been assigned to you for review.",
+        id: 102,
+        title: "Escalated Ticket Alert",
+        message: "Ticket #TK-992 (HVAC failure) has been escalated to critical priority.",
         type: "TICKET_ASSIGNED",
+        role: "ADMIN",
+        isRead: false,
+        createdAt: new Date(Date.now() - 1800000).toISOString()
+      },
+      {
+        id: 103,
+        title: "New Facility Added",
+        message: "A new study space 'Library Pod 4' has been registered in the system.",
+        type: "ROLE_ASSIGNED",
+        role: "ADMIN",
+        isRead: true,
+        createdAt: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: 104,
+        title: "High System Load",
+        message: "Server resources exceeded 90% utilization during morning peak.",
+        type: "ROLE_REMOVED",
+        role: "ADMIN",
+        isRead: false,
+        createdAt: new Date(Date.now() - 10800000).toISOString()
+      },
+
+      // --- TECHNICIAN NOTIFICATIONS ---
+      {
+        id: 201,
+        title: "New Ticket Assigned",
+        message: "Ticket #TK-1002 (Projector Fault) has been assigned to your workspace.",
+        type: "TICKET_ASSIGNED",
+        role: "TECHNICIAN",
         isRead: false,
         createdAt: new Date(Date.now() - 3600000).toISOString()
+      },
+      {
+        id: 202,
+        title: "Work Report Reminder",
+        message: "Weekly technician performance reports are due by Friday 5 PM.",
+        type: "COMMENT_ADDED",
+        role: "TECHNICIAN",
+        isRead: false,
+        createdAt: new Date(Date.now() - 7200000).toISOString()
+      },
+      {
+        id: 203,
+        title: "Urgent Maintenance",
+        message: "Room 402 AC requires immediate attention. Priority updated to High.",
+        type: "TICKET_IN_PROGRESS",
+        role: "TECHNICIAN",
+        isRead: false,
+        createdAt: new Date(Date.now() - 5400000).toISOString()
+      },
+      {
+        id: 204,
+        title: "Comment on Assigned Ticket",
+        message: "Reporter added an image to #TK-1002. Please check attachments.",
+        type: "COMMENT_ADDED",
+        role: "TECHNICIAN",
+        isRead: true,
+        createdAt: new Date(Date.now() - 172800000).toISOString()
+      },
+
+      // --- USER NOTIFICATIONS ---
+      {
+        id: 301,
+        title: "Booking Approved",
+        message: "Your request for LAB-402 for 'Project Work' has been confirmed.",
+        type: "BOOKING_APPROVED",
+        role: "USER",
+        isRead: false,
+        createdAt: new Date(Date.now() - 4500000).toISOString()
+      },
+      {
+        id: 302,
+        title: "Comment on your Ticket",
+        message: "Technician Sam has replied to your projector fault report.",
+        type: "COMMENT_ADDED",
+        role: "USER",
+        isRead: false,
+        createdAt: new Date(Date.now() - 9000000).toISOString()
+      },
+      {
+        id: 303,
+        title: "Ticket Resolved",
+        message: "Your ticket #TK-1001 (Wi-Fi issue) has been marked as resolved.",
+        type: "TICKET_ASSIGNED",
+        role: "USER",
+        isRead: true,
+        createdAt: new Date(Date.now() - 259200000).toISOString()
+      },
+      {
+        id: 304,
+        title: "Booking Reminder",
+        message: "Your reservation for Hall-2 starts in 30 minutes.",
+        type: "BOOKING_APPROVED",
+        role: "USER",
+        isRead: false,
+        createdAt: new Date(Date.now() - 1800000).toISOString()
+      },
+      {
+        id: 305,
+        title: "Booking Rejected",
+        message: "Your request for LAB-5 was rejected due to scheduled maintenance.",
+        type: "BOOKING_REJECTED",
+        role: "USER",
+        isRead: false,
+        createdAt: new Date(Date.now() - 21600000).toISOString()
       }
     ];
     localStorage.setItem(MOCK_KEY, JSON.stringify(seeded));
-    return seeded;
+    return seeded.filter(n => n.role === role);
   }
-  return JSON.parse(raw);
+  return JSON.parse(raw).filter(n => n.role === role);
 }
 
 export const notificationService = {

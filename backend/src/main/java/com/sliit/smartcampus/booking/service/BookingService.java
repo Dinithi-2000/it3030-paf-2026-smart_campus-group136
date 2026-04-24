@@ -7,6 +7,7 @@ import com.sliit.smartcampus.booking.api.dto.BookingStatusUpdateDTO;
 import com.sliit.smartcampus.booking.model.Booking;
 import com.sliit.smartcampus.booking.model.BookingStatus;
 import com.sliit.smartcampus.booking.repository.BookingRepository;
+import com.sliit.smartcampus.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
 
     public BookingResponseDTO createBooking(BookingRequestDTO dto, String userId) {
         if (!dto.getEndTime().isAfter(dto.getStartTime())) {
@@ -94,12 +96,23 @@ public class BookingService {
             if (nextStatus == BookingStatus.APPROVED) {
                 booking.setStatus(BookingStatus.APPROVED);
                 booking.setRejectionReason(null);
+                notificationService.notifyBookingApprovedByUsername(
+                    booking.getUserId(),
+                    booking.getResourceId(),
+                    booking.getId()
+                );
             } else if (nextStatus == BookingStatus.REJECTED) {
                 if (!StringUtils.hasText(dto.getRejectionReason())) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rejection reason is required when rejecting a booking.");
                 }
                 booking.setStatus(BookingStatus.REJECTED);
                 booking.setRejectionReason(dto.getRejectionReason().trim());
+                notificationService.notifyBookingRejectedByUsername(
+                    booking.getUserId(),
+                    booking.getResourceId(),
+                    booking.getRejectionReason(),
+                    booking.getId()
+                );
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed");
             }

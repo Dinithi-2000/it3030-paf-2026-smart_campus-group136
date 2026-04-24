@@ -1,6 +1,7 @@
 package com.sliit.smartcampus.controller;
 
 import com.sliit.smartcampus.model.Notification;
+import com.sliit.smartcampus.repository.UserRepository;
 import com.sliit.smartcampus.service.NotificationService;
 import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
@@ -27,9 +28,11 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, UserRepository userRepository) {
         this.notificationService = notificationService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -240,15 +243,12 @@ public class NotificationController {
      * In a real OAuth implementation, this would extract from JWT token
      */
     private Long extractUserIdFromAuthentication(Authentication authentication) {
-        // This is a placeholder - in production, extract from JWT or security context
-        // For now, we'll use the principal name and convert it
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
-            String username = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
-            // Query user by username to get ID
-            // In production, this should be optimized
-            return 1L; // Placeholder - should be replaced with actual user lookup
+        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+            return null;
         }
-        return null;
+
+        return userRepository.findByUsername(authentication.getName())
+                .map(user -> user.getId())
+                .orElse(null);
     }
 }

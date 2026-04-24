@@ -49,6 +49,32 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
+        public Notification notifyBookingApprovedByUsername(String username, String bookingReference, Long bookingId) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return createNotification(
+            user.getId(),
+            "Booking Approved",
+            "Your booking (" + bookingReference + ") has been approved. You can now proceed with your planned activity.",
+            Notification.NotificationType.BOOKING_APPROVED,
+            "BOOKING",
+            bookingId);
+        }
+
+        public Notification notifyBookingRejectedByUsername(String username, String bookingReference, String reason, Long bookingId) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return createNotification(
+            user.getId(),
+            "Booking Rejected",
+            "Your booking (" + bookingReference + ") has been rejected. Reason: " + reason,
+            Notification.NotificationType.BOOKING_REJECTED,
+            "BOOKING",
+            bookingId);
+        }
+
     /**
      * Get all notifications for a user (paginated)
      */
@@ -106,7 +132,8 @@ public class NotificationService {
      * Delete old notifications for a user (older than specified days)
      */
     public void deleteOldNotifications(Long userId, Integer days) {
-        notificationRepository.deleteOldNotifications(userId, days);
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(days == null ? 30 : days);
+        notificationRepository.deleteOldNotifications(userId, cutoff);
     }
 
     /**

@@ -1241,7 +1241,7 @@ function BookingsPage({ mode = "my" }) {
                         onClick={isAdminReviewView ? () => handleViewBooking(booking) : undefined}
                         className={
                           isAdminReviewView
-                            ? "cursor-pointer border-b border-gray-100 text-sm text-gray-600 transition-colors duration-150 hover:bg-gray-50"
+                            ? `cursor-pointer border-b border-gray-100 text-sm text-gray-600 transition-colors duration-150 ${isNewBooking ? "bg-amber-50/60 hover:bg-amber-50" : "hover:bg-gray-50"}`
                             : isStudentBookingsView
                             ? `${statusTone.border} ${booking.id % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-violet-50`
                             : `booking-row${isNewBooking ? " booking-row-new" : ""}`
@@ -1249,7 +1249,15 @@ function BookingsPage({ mode = "my" }) {
                       >
                         <td className={isAdminReviewView ? "px-6 py-5" : isStudentBookingsView ? "px-4 py-3 text-sm text-slate-700" : ""}>
                           <div className={isAdminReviewView ? "flex flex-col" : "booking-resource-cell"}>
-                            <strong className={isAdminReviewView ? "text-sm font-semibold text-gray-900" : ""}>{booking.resourceId}</strong>
+                            <div className="flex items-center gap-2">
+                              <strong className={isAdminReviewView ? "text-sm font-semibold text-gray-900" : ""}>{booking.resourceId}</strong>
+                              {isAdminReviewView && isNewBooking ? (
+                                <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                  New
+                                </span>
+                              ) : null}
+                            </div>
                             {isAdminReviewView ? <span className="mt-1 text-xs text-gray-400">{booking.expectedAttendees ?? "-"} attendees</span> : null}
                             {!isAdminReviewView && isNewBooking ? <span className="booking-new-badge">NEW</span> : null}
                           </div>

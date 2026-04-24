@@ -1,5 +1,6 @@
 // Author: Member 2 - Booking Management Module
 import client from "./client";
+import { notificationService } from "./notificationService";
 
 const MOCK_KEY = "smartcampus.mockBookings.v1";
 
@@ -246,6 +247,22 @@ export async function createBooking(payload) {
       };
 
       writeMockBookings([created, ...bookings]);
+
+      // Trigger Notifications
+      notificationService.addNotification({
+        title: "Booking Requested",
+        message: `Your booking for ${created.resourceId} is now PENDING approval.`,
+        type: "COMMENT_ADDED",
+        role: "USER"
+      });
+
+      notificationService.addNotification({
+        title: "New Booking Request",
+        message: `${userName} has requested ${created.resourceId} for ${created.purpose}.`,
+        type: "ROLE_ASSIGNED",
+        role: "ADMIN"
+      });
+
       return { data: created };
     }
   );
@@ -295,6 +312,17 @@ export async function updateBookingStatus(bookingId, payload) {
       booking.updatedAt = nowIso();
       bookings[index] = booking;
       writeMockBookings(bookings);
+
+      // Trigger Notification for the User
+      notificationService.addNotification({
+        title: booking.status === "APPROVED" ? "Booking Approved" : "Booking Rejected",
+        message: booking.status === "APPROVED" 
+          ? `Your booking for ${booking.resourceId} has been confirmed.`
+          : `Your booking for ${booking.resourceId} was rejected: ${booking.rejectionReason}`,
+        type: booking.status === "APPROVED" ? "BOOKING_APPROVED" : "BOOKING_REJECTED",
+        role: "USER"
+      });
+
       return { data: booking };
     }
   );

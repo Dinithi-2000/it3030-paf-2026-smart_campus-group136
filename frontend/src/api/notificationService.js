@@ -18,6 +18,17 @@ function currentRole() {
   }
 }
 
+function mergeById(primary, secondary) {
+  const merged = [...primary];
+  const existingIds = new Set(primary.map((n) => String(n.id)));
+  for (const n of secondary) {
+    if (!existingIds.has(String(n.id))) {
+      merged.push(n);
+    }
+  }
+  return merged;
+}
+
 function readMockNotifications() {
   const role = currentRole();
   const raw = localStorage.getItem(MOCK_KEY);
@@ -153,35 +164,65 @@ function readMockNotifications() {
 }
 
 export const notificationService = {
+  addNotification: async (notification) => {
+    // In a real app, this would be a POST to /api/notifications
+    // For now, we update the local mock storage
+    const all = JSON.parse(localStorage.getItem(MOCK_KEY) || "[]");
+    const newNotif = {
+      id: Date.now(),
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      ...notification
+    };
+    localStorage.setItem(MOCK_KEY, JSON.stringify([newNotif, ...all]));
+    return newNotif;
+  },
+
   getNotifications: async (page = 0, size = 20) => {
+    let serverContent = [];
+    let serverTotal = 0;
+    let serverLast = true;
+
     try {
       const response = await client.get(API_BASE, { params: { page, size } });
-      if (response.data.content && response.data.content.length > 0) return response.data;
-      throw new Error("Empty server data");
+      serverContent = response.data.content || [];
+      serverTotal = response.data.totalElements || 0;
+      serverLast = response.data.last ?? true;
     } catch (error) {
-      const all = readMockNotifications();
-      return {
-        content: all.slice(page * size, (page + 1) * size),
-        totalElements: all.length,
-        last: (page + 1) * size >= all.length
-      };
+      // Server fail, will fallback to local
     }
+
+    const localAll = readMockNotifications();
+    const merged = mergeById(serverContent, localAll).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    return {
+      content: merged.slice(page * size, (page + 1) * size),
+      totalElements: Math.max(serverTotal, merged.length),
+      last: (page + 1) * size >= merged.length
+    };
   },
 
   getUnreadNotifications: async () => {
+    let serverUnread = [];
     try {
       const response = await client.get(`${API_BASE}/unread`);
-      if (response.data && response.data.length > 0) return response.data;
-      throw new Error("Empty server data");
+      serverUnread = response.data || [];
     } catch (error) {
-      return readMockNotifications().filter(n => !n.isRead);
+      // Server fail
     }
+
+    const localUnread = readMockNotifications().filter(n => !n.isRead);
+    return mergeById(serverUnread, localUnread).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
 
   getUnreadCount: async () => {
     try {
       const response = await client.get(`${API_BASE}/unread/count`);
-      return response.data.unreadCount;
+      const serverCount = response.data.unreadCount || 0;
+      const localCount = readMockNotifications().filter(n => !n.isRead).length;
+      // We take the max or sum? Usually max if we assume some overlap, 
+      // but here sum is safer to show all unread.
+      return Math.max(serverCount, localCount);
     } catch (error) {
       return readMockNotifications().filter(n => !n.isRead).length;
     }

@@ -1387,6 +1387,19 @@ function BookingsPage({ mode = "my" }) {
                                 Reject
                               </button>
                             ) : null}
+                            {!isAdminReviewView ? (
+                              <button
+                                type="button"
+                                className={
+                                  isStudentBookingsView
+                                    ? "rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                                    : "booking-secondary-btn"
+                                }
+                                onClick={() => navigate(`/booking/${booking.id}`)}
+                              >
+                                View
+                              </button>
+                            ) : null}
                             {canCancel ? (
                               <button
                                 type="button"

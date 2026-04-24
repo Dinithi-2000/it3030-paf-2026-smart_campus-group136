@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchMyBookings } from "../api/bookings";
+import BookingQrCard from "../components/BookingQrCard";
 import DashboardShell from "../components/layout/DashboardShell";
 import "./BookingsPage.css";
 
@@ -111,6 +112,8 @@ function BookingDetailsPage() {
                     <strong>Rejection reason:</strong> {booking.rejectionReason}
                   </div>
                 ) : null}
+
+                <BookingQrCard booking={booking} />
               </div>
             </div>
           )}

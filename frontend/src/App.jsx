@@ -17,6 +17,7 @@ import RoleBasedDashboardPage from "./pages/RoleBasedDashboardPage";
 import RoleBasedTicketsPage from "./pages/RoleBasedTicketsPage";
 import TechnicianDashboardPage from "./pages/TechnicianDashboardPage";
 import TechnicianTicketsPage from "./pages/TechnicianTicketsPage";
+import TechWorkReportPage from "./pages/TechWorkReportPage";
 import TicketsPage from "./pages/TicketsPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
@@ -47,8 +48,9 @@ function App() {
       <Route path="/user-tickets" element={<ProtectedRoute><TicketsPage /></ProtectedRoute>} />
       <Route path="/tech-tickets" element={<ProtectedRoute><TechnicianTicketsPage /></ProtectedRoute>} />
 
-      {/* ── Technician dedicated dashboard ── */}
-      <Route path="/tech-dashboard" element={<ProtectedRoute><TechnicianDashboardPage /></ProtectedRoute>} />
+      {/* ── Technician dedicated pages ── */}
+      <Route path="/tech-dashboard"    element={<ProtectedRoute><TechnicianDashboardPage /></ProtectedRoute>} />
+      <Route path="/tech-work-report"  element={<ProtectedRoute><TechWorkReportPage /></ProtectedRoute>} />
 
       {/* ── Admin-only routes ── */}
       <Route path="/admin-booking/:bookingId" element={<ProtectedRoute requiredRole="ADMIN"><AdminBookingDetailsPage /></ProtectedRoute>} />

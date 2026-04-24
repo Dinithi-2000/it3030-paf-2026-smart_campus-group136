@@ -11,11 +11,11 @@ const navItems = {
     { label: "Analytics", to: "/analytics", icon: "analytics" }
   ],
   TECHNICIAN: [
-    { label: "Dashboard", to: "/tech-dashboard", icon: "dashboard" },
-    { label: "My Tickets", to: "/tech-tickets", icon: "ticketing" },
-    { label: "Resources", to: "/facilities", icon: "resources" },
-    { label: "My Bookings", to: "/my-bookings", icon: "booking" },
-    { label: "Notifications", to: "/notifications", icon: "notifications" }
+    { label: "Dashboard",   to: "/tech-dashboard",   icon: "dashboard" },
+    { label: "Tickets",     to: "/tech-tickets",     icon: "ticketing" },
+    { label: "Resources",   to: "/facilities",       icon: "resources" },
+    { label: "Bookings",    to: "/my-bookings",      icon: "booking" },
+    { label: "Work Report", to: "/tech-work-report", icon: "analytics" }
   ],
   USER: [
     { label: "Dashboard", to: "/dashboard", icon: "dashboard" },

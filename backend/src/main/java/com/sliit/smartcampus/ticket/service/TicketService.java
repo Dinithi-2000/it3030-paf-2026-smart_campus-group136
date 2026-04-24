@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -97,6 +98,8 @@ public class TicketService {
             ticket.setStatus(TicketStatus.IN_PROGRESS);
         }
 
+        markFirstResponseIfNeeded(ticket, actor.role());
+
         ticket.setUpdatedAt(Instant.now());
         return toResponse(ticketRepository.save(ticket));
     }
@@ -121,6 +124,7 @@ public class TicketService {
 
         ticket.setStatus(request.getStatus());
         ticket.setUpdatedAt(Instant.now());
+        markFirstResponseIfNeeded(ticket, actor.role());
 
         if (StringUtils.hasText(request.getResolutionNotes())) {
             ticket.setResolutionNotes(request.getResolutionNotes().trim());
@@ -133,6 +137,14 @@ public class TicketService {
 
         if (request.getStatus() == TicketStatus.CLOSED) {
             ticket.setClosedAt(Instant.now());
+        }
+
+        if (request.getStatus() == TicketStatus.RESOLVED || request.getStatus() == TicketStatus.CLOSED) {
+            if (ticket.getResolvedAt() == null) {
+                ticket.setResolvedAt(Instant.now());
+            }
+        } else if (request.getStatus() == TicketStatus.IN_PROGRESS) {
+            ticket.setResolvedAt(null);
         }
 
         return toResponse(ticketRepository.save(ticket));
@@ -151,6 +163,7 @@ public class TicketService {
         comment.setUpdatedAt(Instant.now());
 
         ticket.getComments().add(comment);
+        markFirstResponseIfNeeded(ticket, actor.role());
         ticket.setUpdatedAt(Instant.now());
         return toResponse(ticketRepository.save(ticket));
     }
@@ -307,6 +320,23 @@ public class TicketService {
         return merged;
     }
 
+    private void markFirstResponseIfNeeded(Ticket ticket, ActorRole actorRole) {
+        if (ticket.getFirstResponseAt() != null) {
+            return;
+        }
+        if (actorRole == ActorRole.ADMIN || actorRole == ActorRole.TECHNICIAN) {
+            ticket.setFirstResponseAt(Instant.now());
+        }
+    }
+
+    private Long minutesBetween(Instant from, Instant to) {
+        if (from == null || to == null) {
+            return null;
+        }
+        long minutes = Duration.between(from, to).toMinutes();
+        return Math.max(minutes, 0L);
+    }
+
     private TicketResponse toResponse(Ticket ticket) {
         TicketResponse response = new TicketResponse();
         response.setId(ticket.getId());
@@ -354,6 +384,10 @@ public class TicketService {
         response.setCreatedAt(ticket.getCreatedAt());
         response.setUpdatedAt(ticket.getUpdatedAt());
         response.setClosedAt(ticket.getClosedAt());
+        response.setFirstResponseAt(ticket.getFirstResponseAt());
+        response.setResolvedAt(ticket.getResolvedAt());
+        response.setTimeToFirstResponseMinutes(minutesBetween(ticket.getCreatedAt(), ticket.getFirstResponseAt()));
+        response.setTimeToResolutionMinutes(minutesBetween(ticket.getCreatedAt(), ticket.getResolvedAt()));
         return response;
     }
 }

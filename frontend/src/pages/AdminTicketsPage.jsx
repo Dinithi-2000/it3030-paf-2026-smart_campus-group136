@@ -44,6 +44,14 @@ function statusClass(s) {
 function count(tickets, status) {
   return tickets.filter((t) => t.status === status).length;
 }
+function formatDurationMinutes(minutes) {
+  if (minutes === null || minutes === undefined || Number.isNaN(Number(minutes))) return "-";
+  const total = Math.max(Number(minutes), 0);
+  const hours = Math.floor(total / 60);
+  const mins = total % 60;
+  if (hours === 0) return `${mins}m`;
+  return `${hours}h ${mins}m`;
+}
 
 function AdminTicketsPage() {
   const { user, roles, logout } = useAuth();
@@ -355,6 +363,11 @@ function AdminTicketsPage() {
                       <span>🧑 {selectedTicket.createdByName}</span>
                       <span>📞 {selectedTicket.preferredContact}</span>
                       <span>🕐 {prettyDate(selectedTicket.createdAt)}</span>
+                    </div>
+
+                    <div className="atk-meta-row">
+                      <span>TTFR: {formatDurationMinutes(selectedTicket.timeToFirstResponseMinutes)}</span>
+                      <span>TTR: {formatDurationMinutes(selectedTicket.timeToResolutionMinutes)}</span>
                     </div>
 
                     <div className="atk-section">

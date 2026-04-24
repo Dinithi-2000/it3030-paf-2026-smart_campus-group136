@@ -40,6 +40,14 @@ function shortTime(v) {
 function statusClass(s) {
   return `status-pill status-${String(s || "open").toLowerCase().replaceAll("_", "-")}`;
 }
+function formatDurationMinutes(minutes) {
+  if (minutes === null || minutes === undefined || Number.isNaN(Number(minutes))) return "-";
+  const total = Math.max(Number(minutes), 0);
+  const hours = Math.floor(total / 60);
+  const mins = total % 60;
+  if (hours === 0) return `${mins}m`;
+  return `${hours}h ${mins}m`;
+}
 
 export default function TechnicianTicketsPage() {
   const { user, roles } = useAuth();
@@ -357,6 +365,11 @@ export default function TechnicianTicketsPage() {
                     <span>🧑 {selectedTicket.createdByName}</span>
                     <span>📞 {selectedTicket.preferredContact}</span>
                     <span>🕐 {prettyDate(selectedTicket.createdAt)}</span>
+                  </div>
+
+                  <div className="atk-meta-row">
+                    <span>TTFR: {formatDurationMinutes(selectedTicket.timeToFirstResponseMinutes)}</span>
+                    <span>TTR: {formatDurationMinutes(selectedTicket.timeToResolutionMinutes)}</span>
                   </div>
 
                   {/* Assignment info */}

@@ -27,6 +27,10 @@ public class TicketResponse {
     private Instant createdAt;
     private Instant updatedAt;
     private Instant closedAt;
+    private Instant firstResponseAt;
+    private Instant resolvedAt;
+    private Long timeToFirstResponseMinutes;
+    private Long timeToResolutionMinutes;
 
     public Long getId() {
         return id;
@@ -178,6 +182,38 @@ public class TicketResponse {
 
     public void setClosedAt(Instant closedAt) {
         this.closedAt = closedAt;
+    }
+
+    public Instant getFirstResponseAt() {
+        return firstResponseAt;
+    }
+
+    public void setFirstResponseAt(Instant firstResponseAt) {
+        this.firstResponseAt = firstResponseAt;
+    }
+
+    public Instant getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(Instant resolvedAt) {
+        this.resolvedAt = resolvedAt;
+    }
+
+    public Long getTimeToFirstResponseMinutes() {
+        return timeToFirstResponseMinutes;
+    }
+
+    public void setTimeToFirstResponseMinutes(Long timeToFirstResponseMinutes) {
+        this.timeToFirstResponseMinutes = timeToFirstResponseMinutes;
+    }
+
+    public Long getTimeToResolutionMinutes() {
+        return timeToResolutionMinutes;
+    }
+
+    public void setTimeToResolutionMinutes(Long timeToResolutionMinutes) {
+        this.timeToResolutionMinutes = timeToResolutionMinutes;
     }
 
     public static class AttachmentMetaResponse {

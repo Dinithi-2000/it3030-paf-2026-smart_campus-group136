@@ -49,6 +49,8 @@ public class Ticket {
     private Instant createdAt;
     private Instant updatedAt;
     private Instant closedAt;
+    private Instant firstResponseAt;
+    private Instant resolvedAt;
 
     public Long getId() {
         return id;
@@ -200,5 +202,21 @@ public class Ticket {
 
     public void setClosedAt(Instant closedAt) {
         this.closedAt = closedAt;
+    }
+
+    public Instant getFirstResponseAt() {
+        return firstResponseAt;
+    }
+
+    public void setFirstResponseAt(Instant firstResponseAt) {
+        this.firstResponseAt = firstResponseAt;
+    }
+
+    public Instant getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(Instant resolvedAt) {
+        this.resolvedAt = resolvedAt;
     }
 }

@@ -66,7 +66,11 @@ function seedTickets() {
       ],
       createdAt: nowIso(),
       updatedAt: nowIso(),
-      closedAt: null
+      closedAt: null,
+      firstResponseAt: null,
+      resolvedAt: null,
+      timeToFirstResponseMinutes: null,
+      timeToResolutionMinutes: null
     },
     {
       id: "TK-1002",
@@ -87,7 +91,11 @@ function seedTickets() {
       comments: [],
       createdAt: nowIso(),
       updatedAt: nowIso(),
-      closedAt: null
+      closedAt: null,
+      firstResponseAt: null,
+      resolvedAt: null,
+      timeToFirstResponseMinutes: null,
+      timeToResolutionMinutes: null
     }
   ];
 }
@@ -244,7 +252,11 @@ export async function createTicket(payload) {
       comments: [],
       createdAt: nowIso(),
       updatedAt: nowIso(),
-      closedAt: null
+      closedAt: null,
+      firstResponseAt: null,
+      resolvedAt: null,
+      timeToFirstResponseMinutes: null,
+      timeToResolutionMinutes: null
     };
 
     writeMockTickets([created, ...existing]);

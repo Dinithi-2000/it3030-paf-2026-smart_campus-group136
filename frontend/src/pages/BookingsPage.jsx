@@ -1133,103 +1133,8 @@ function BookingsPage({ mode = "my" }) {
         ) : null}
       </div>
 
-      {selectedBooking && isAdminReviewView ? (
-        <aside className="fixed inset-y-0 right-0 z-40 flex w-full justify-end bg-black/10">
-          <div className="h-full w-full max-w-md transform overflow-y-auto bg-white p-6 shadow-xl transition-transform duration-300 translate-x-0">
-            <div className="flex items-start justify-between border-b border-gray-200 pb-4">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.08em] text-gray-500">Booking Details</p>
-                <h2 className="mt-1 text-lg font-semibold text-gray-900">#{selectedBooking.id}</h2>
-              </div>
-              <button
-                type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition-colors duration-150 hover:bg-gray-50"
-                onClick={closeBookingModal}
-                aria-label="Close booking details"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                  <path d="M5 5 15 15" strokeLinecap="round" />
-                  <path d="M15 5 5 15" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="mt-5 space-y-0 text-sm text-gray-600">
-              <div className="border-b border-gray-100 pb-3">
-                <p className="text-xs text-gray-400">Resource</p>
-                <p className="mt-1 font-medium text-gray-900">{selectedBooking.resourceId}</p>
-              </div>
-              <div className="border-b border-gray-100 py-3">
-                <p className="text-xs text-gray-400">Requester</p>
-                <p className="mt-1 font-medium text-gray-900">{selectedBooking.userId}</p>
-              </div>
-              <div className="border-b border-gray-100 py-3">
-                <p className="text-xs text-gray-400">Purpose</p>
-                <p className="mt-1 text-gray-700">{selectedBooking.purpose}</p>
-              </div>
-              <div className="border-b border-gray-100 py-3">
-                <p className="text-xs text-gray-400">Time</p>
-                <p className="mt-1 text-gray-700">{formatTimeRange(selectedBooking.startTime, selectedBooking.endTime)}</p>
-              </div>
-              <div className="border-b border-gray-100 py-3">
-                <p className="text-xs text-gray-400">Expected Attendees</p>
-                <p className="mt-1 text-gray-700">{selectedBooking.expectedAttendees ?? "-"}</p>
-              </div>
-              <div className="py-3">
-                <p className="text-xs text-gray-400">Current Status</p>
-                <span className={`mt-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${adminStatusTone(selectedBooking.status).badge}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${adminStatusTone(selectedBooking.status).dot}`} />
-                  {STATUS_LABELS[selectedBooking.status] || selectedBooking.status}
-                </span>
-              </div>
-
-              <div>
-                <label htmlFor="admin-rejection-reason" className="text-xs font-medium text-gray-500">
-                  Rejection Reason
-                </label>
-                <textarea
-                  id="admin-rejection-reason"
-                  rows={3}
-                  value={rejectionReasonInput}
-                  onChange={(event) => setRejectionReasonInput(event.target.value)}
-                  className="mt-2 w-full rounded-lg border border-red-200 px-3 py-2 text-sm text-gray-700 outline-none"
-                  placeholder="Enter reason if rejecting this booking"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <button
-                type="button"
-                className="rounded-lg border border-[#bbf7d0] px-3 py-2 text-xs font-medium text-[#166534] transition hover:bg-[#dcfce7] disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={busyBookingId === selectedBooking.id || selectedBooking.status !== "PENDING"}
-                onClick={() => handleApprove(selectedBooking.id)}
-              >
-                Approve
-              </button>
-              <button
-                type="button"
-                className="rounded-lg border border-[#fecaca] px-3 py-2 text-xs font-medium text-[#991b1b] transition hover:bg-[#fee2e2] disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={busyBookingId === selectedBooking.id}
-                onClick={() => handleReject(selectedBooking.id, rejectionReasonInput)}
-              >
-                Reject
-              </button>
-              <button
-                type="button"
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-xs font-medium text-[#374151] transition hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={busyBookingId === selectedBooking.id}
-                onClick={handleDeleteFromModal}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </aside>
-      ) : null}
-
-      {selectedBooking && !isAdminReviewView ? (
-        <div className="booking-modal-backdrop" onClick={closeBookingModal} role="presentation">
+      {selectedBooking ? (
+        <div className="booking-modal-backdrop bg-black/20 backdrop-blur-sm" onClick={closeBookingModal} role="presentation">
           <article
             className="booking-modal"
             onClick={(event) => event.stopPropagation()}
@@ -1299,6 +1204,51 @@ function BookingsPage({ mode = "my" }) {
                 {selectedBooking.rejectionReason ? (
                   <div className="booking-detail-note booking-detail-note-error">
                     <strong>Rejection reason:</strong> {selectedBooking.rejectionReason}
+                  </div>
+                ) : null}
+
+                {isAdminReviewView ? (
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <label htmlFor="admin-rejection-reason" className="text-xs font-medium text-gray-500">
+                        Rejection Reason
+                      </label>
+                      <textarea
+                        id="admin-rejection-reason"
+                        rows={3}
+                        value={rejectionReasonInput}
+                        onChange={(event) => setRejectionReasonInput(event.target.value)}
+                        className="mt-2 w-full rounded-lg border border-red-200 px-3 py-2 text-sm text-gray-700 outline-none"
+                        placeholder="Enter reason if rejecting this booking"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-[#bbf7d0] px-3 py-2 text-xs font-medium text-[#166534] transition hover:bg-[#dcfce7] disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={busyBookingId === selectedBooking.id || selectedBooking.status !== "PENDING"}
+                        onClick={() => handleApprove(selectedBooking.id)}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-[#fecaca] px-3 py-2 text-xs font-medium text-[#991b1b] transition hover:bg-[#fee2e2] disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={busyBookingId === selectedBooking.id}
+                        onClick={() => handleReject(selectedBooking.id, rejectionReasonInput)}
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-[#d1d5db] px-3 py-2 text-xs font-medium text-[#374151] transition hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={busyBookingId === selectedBooking.id}
+                        onClick={handleDeleteFromModal}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ) : null}
 

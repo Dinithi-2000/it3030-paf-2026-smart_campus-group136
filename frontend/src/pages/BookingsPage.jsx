@@ -458,6 +458,9 @@ function BookingsPage({ mode = "my" }) {
 
   const submitDisabled =
     submitting || !form.resourceId.trim() || !form.startTime || !form.endTime || !form.purpose.trim() || draftConflicts.length > 0;
+  const createReadyToSubmit = Boolean(form.resourceId.trim() && form.startTime && form.endTime && form.purpose.trim() && draftConflicts.length === 0);
+  const createDatePreview = form.startTime ? formatDateOnly(form.startTime) : "Not set";
+  const createTimePreview = form.startTime && form.endTime ? formatTimeWindow(form.startTime, form.endTime) : "Not set";
 
   return (
     <DashboardShell
@@ -466,7 +469,7 @@ function BookingsPage({ mode = "my" }) {
       onSearchChange={(e) => setSearchTerm(e.target.value)}
     >
         <section
-          className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""} ${isStudentBookingsView ? "min-h-screen rounded-3xl bg-slate-50 p-4 md:p-6" : ""} ${isAdminReviewView ? "min-h-screen bg-[#f9fafb] px-6 py-8" : ""}`}
+          className={`ops-content booking-page${isAdminReviewView || isCreateView ? " booking-page-admin" : ""} ${isStudentBookingsView ? "min-h-screen rounded-3xl bg-slate-50 p-4 md:p-6" : ""} ${isAdminReviewView ? "min-h-screen bg-[#f9fafb] px-6 py-8" : ""} ${isCreateView ? "min-h-screen bg-[#f8fafc] px-6 py-8" : ""}`}
         >
           {isStudentBookingsView ? (
             <header ref={formRef} className="mb-6 space-y-4">
@@ -504,6 +507,30 @@ function BookingsPage({ mode = "my" }) {
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cancelled</p>
                   <p className="mt-1 text-2xl font-bold text-slate-600">{cancelledCount}</p>
                 </div>
+              </div>
+            </header>
+          ) : isCreateView ? (
+            <header className="mb-6 border-b border-[#e2e8f0] pb-6" ref={formRef}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-gray-400">Bookings / Create New Booking</p>
+                  <h1 className="mt-2 text-2xl font-semibold text-gray-900">Create a Booking</h1>
+                  <p className="mt-1 text-sm text-gray-500">Reserve a facility or resource for your event or session</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadBookings}
+                  disabled={loading}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] shadow-sm transition hover:bg-[#f1f5f9] disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="Refresh bookings"
+                >
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                    <path d="M3 10a7 7 0 0 1 12-4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M15 2v4h-4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M17 10a7 7 0 0 1-12 4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M5 18v-4h4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
               </div>
             </header>
           ) : isAdminReviewView ? (
@@ -589,10 +616,255 @@ function BookingsPage({ mode = "my" }) {
           )}
 
       {error ? <div className="booking-alert booking-alert-error">{error}</div> : null}
-      {success ? <div className="booking-alert booking-alert-success">{success}</div> : null}
+      {success && !isCreateView ? <div className="booking-alert booking-alert-success">{success}</div> : null}
 
       <div className={`booking-grid${useSingleColumnGrid || isStudentBookingsView ? " booking-grid-single" : ""}`}>
         {showCreatePanel ? (
+          isCreateView ? (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <article className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+                  {success ? (
+                    <div className="rounded-xl border border-green-200 bg-green-50 p-6">
+                      <p className="text-lg font-semibold text-[#166534]">✓ Booking Submitted Successfully</p>
+                      <p className="mt-2 text-sm text-[#166534]">Your booking is pending admin approval. You will be notified once reviewed.</p>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/my-bookings")}
+                        className="mt-5 rounded-xl bg-[#0d9488] px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#0f766e]"
+                      >
+                        View My Bookings
+                      </button>
+                    </div>
+                  ) : (
+                    <form className="space-y-6" onSubmit={handleCreateBooking}>
+                      <div>
+                        <p className="mb-4 border-l-2 border-teal-400 pl-2 text-xs font-semibold uppercase tracking-widest text-gray-400">Resource Details</p>
+                        <div>
+                          <label htmlFor="resourceId" className="mb-2 block text-sm font-medium text-gray-700">
+                            Select Resource
+                          </label>
+                          <input
+                            id="resourceId"
+                            name="resourceId"
+                            value={form.resourceId}
+                            onChange={handleFieldChange}
+                            className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#0f172a] outline-none transition-all duration-150 focus:border-transparent focus:ring-2 focus:ring-teal-500"
+                            type="text"
+                            placeholder="e.g. LAB-402"
+                            list="booking-resources"
+                          />
+                          <datalist id="booking-resources">
+                            {RESOURCE_SUGGESTIONS.map((resourceId) => (
+                              <option key={resourceId} value={resourceId} />
+                            ))}
+                          </datalist>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {RESOURCE_SUGGESTIONS.map((resourceId) => (
+                            <button
+                              key={resourceId}
+                              type="button"
+                              className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-150 ${normalize(form.resourceId) === normalize(resourceId) ? "border-teal-400 bg-teal-50 font-semibold text-teal-700" : "border-gray-200 bg-white text-gray-600 hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700"}`}
+                              onClick={() => handleQuickPick(resourceId)}
+                            >
+                              {resourceId}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="mb-4 border-l-2 border-teal-400 pl-2 text-xs font-semibold uppercase tracking-widest text-gray-400">Schedule</p>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div>
+                            <label htmlFor="startTime" className="mb-2 block text-sm font-medium text-gray-700">
+                              Start Time
+                            </label>
+                            <div className="relative">
+                              <input
+                                id="startTime"
+                                name="startTime"
+                                value={form.startTime}
+                                onChange={handleFieldChange}
+                                className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 text-sm text-[#0f172a] outline-none transition-all duration-150 focus:border-transparent focus:ring-2 focus:ring-teal-500"
+                                type="datetime-local"
+                              />
+                              <svg viewBox="0 0 24 24" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <path d="M8 2v4M16 2v4M3 10h18" strokeLinecap="round" />
+                              </svg>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label htmlFor="endTime" className="mb-2 block text-sm font-medium text-gray-700">
+                              End Time
+                            </label>
+                            <div className="relative">
+                              <input
+                                id="endTime"
+                                name="endTime"
+                                value={form.endTime}
+                                onChange={handleFieldChange}
+                                className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 text-sm text-[#0f172a] outline-none transition-all duration-150 focus:border-transparent focus:ring-2 focus:ring-teal-500"
+                                type="datetime-local"
+                              />
+                              <svg viewBox="0 0 24 24" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <path d="M8 2v4M16 2v4M3 10h18" strokeLinecap="round" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="mb-4 border-l-2 border-teal-400 pl-2 text-xs font-semibold uppercase tracking-widest text-gray-400">Event Information</p>
+                        <div>
+                          <label htmlFor="purpose" className="mb-2 block text-sm font-medium text-gray-700">
+                            Purpose <span className="text-red-400">*</span>
+                          </label>
+                          <textarea
+                            id="purpose"
+                            name="purpose"
+                            value={form.purpose}
+                            onChange={handleFieldChange}
+                            className="h-28 w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#0f172a] outline-none transition-all duration-150 focus:border-transparent focus:ring-2 focus:ring-teal-500"
+                            placeholder="Describe the event or use case..."
+                          />
+                          <p className="mt-1 text-right text-xs text-gray-400">{form.purpose.length}/200</p>
+                        </div>
+
+                        <div className="mt-4">
+                          <label htmlFor="expectedAttendees" className="mb-2 block text-sm font-medium text-gray-700">
+                            Expected Attendees <span className="text-gray-400">(Optional)</span>
+                          </label>
+                          <input
+                            id="expectedAttendees"
+                            name="expectedAttendees"
+                            value={form.expectedAttendees}
+                            onChange={handleFieldChange}
+                            className="w-32 rounded-xl border border-gray-200 px-4 py-3 text-sm text-[#0f172a] outline-none transition-all duration-150 focus:border-transparent focus:ring-2 focus:ring-teal-500"
+                            type="number"
+                            min="1"
+                            placeholder="Optional"
+                          />
+                          <p className="mt-1 text-xs text-gray-400">Leave empty if not applicable</p>
+                        </div>
+                      </div>
+
+                      <div className={`rounded-xl border p-4 ${form.resourceId.trim() && form.startTime && form.endTime ? draftConflicts.length > 0 ? "border-red-200 bg-red-50" : "border-teal-100 bg-linear-to-r from-teal-50 to-cyan-50" : "border-teal-100 bg-linear-to-r from-teal-50 to-cyan-50"}`}>
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 text-teal-600">
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                              <path d="M12 3 4 7v6c0 5 3.5 7.5 8 8 4.5-.5 8-3 8-8V7l-8-4Z" />
+                              <path d="m9 12 2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className={`font-medium ${draftConflicts.length > 0 ? "text-red-700" : "text-teal-800"}`}>Conflict Check</p>
+                            {form.resourceId.trim() && form.startTime && form.endTime ? (
+                              draftConflicts.length > 0 ? (
+                                <div className="mt-2 space-y-2 text-sm text-red-600">
+                                  <p>⚠ Conflict detected — this resource is already booked</p>
+                                  {draftConflicts.map((booking) => (
+                                    <div key={booking.id} className="rounded-lg border border-red-200 bg-white/70 p-2 text-xs">
+                                      <p className="font-medium">{booking.resourceId}</p>
+                                      <p>{formatTimeRange(booking.startTime, booking.endTime)}</p>
+                                      <p className="truncate">{booking.purpose}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="mt-2 text-sm text-teal-600">✓ No conflicts detected</p>
+                              )
+                            ) : (
+                              <p className="mt-2 text-sm text-gray-400">Fill in resource and time to check availability</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {draftConflicts.length > 0 ? (
+                        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                          This resource is unavailable for the selected time slot. Please choose a different time.
+                        </div>
+                      ) : null}
+
+                      <div className="flex items-center">
+                        <button
+                          type="submit"
+                          className="w-full rounded-xl bg-[#0d9488] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:scale-[1.01] hover:bg-[#0f766e] hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                          disabled={submitDisabled}
+                        >
+                          {submitting ? "Submitting..." : "Submit Booking"}
+                        </button>
+                        <button type="button" className="ml-4 text-sm text-gray-500 underline transition hover:text-gray-700" onClick={handleResetDraft}>
+                          Reset
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </article>
+              </div>
+
+              <div className="lg:col-span-1">
+                <article className="sticky top-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-[#0d9488]">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <path d="M8 2v4M16 2v4M3 10h18" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900">Booking Summary</h3>
+                      <p className="text-xs text-gray-400">Preview your booking details</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="border-b border-gray-50 py-3">
+                      <p className="mb-0.5 text-xs uppercase tracking-wider text-gray-400">Resource</p>
+                      <p className="text-sm font-medium text-gray-800">{form.resourceId.trim() || "Not selected"}</p>
+                    </div>
+                    <div className="border-b border-gray-50 py-3">
+                      <p className="mb-0.5 text-xs uppercase tracking-wider text-gray-400">Date</p>
+                      <p className="text-sm font-medium text-gray-800">{createDatePreview}</p>
+                    </div>
+                    <div className="border-b border-gray-50 py-3">
+                      <p className="mb-0.5 text-xs uppercase tracking-wider text-gray-400">Time</p>
+                      <p className="text-sm font-medium text-gray-800">{createTimePreview}</p>
+                    </div>
+                    <div className="border-b border-gray-50 py-3">
+                      <p className="mb-0.5 text-xs uppercase tracking-wider text-gray-400">Purpose</p>
+                      <p className="text-sm font-medium text-gray-800">{form.purpose.trim() ? truncateText(form.purpose, 80) : "Not provided"}</p>
+                    </div>
+                    <div className="border-b border-gray-50 py-3">
+                      <p className="mb-0.5 text-xs uppercase tracking-wider text-gray-400">Attendees</p>
+                      <p className="text-sm font-medium text-gray-800">{form.expectedAttendees || "Not specified"}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${createReadyToSubmit ? "bg-green-500" : "bg-amber-500"}`} />
+                    <p className={`text-sm font-medium ${createReadyToSubmit ? "text-green-700" : "text-amber-700"}`}>{createReadyToSubmit ? "Ready to submit" : "Incomplete"}</p>
+                  </div>
+
+                  <div className="mt-4 rounded-xl bg-blue-50 p-3">
+                    <p className="text-xs font-semibold text-blue-700">💡 Tips</p>
+                    <ul className="mt-1 space-y-1 text-xs text-blue-600">
+                      <li>• Bookings are subject to admin approval</li>
+                      <li>• You can cancel an approved booking anytime</li>
+                      <li>• Check for conflicts before submitting</li>
+                    </ul>
+                  </div>
+                </article>
+              </div>
+            </div>
+          ) : (
           <article className="ops-panel booking-card booking-form-panel">
             <div className="ops-panel-head">
               <h2>{isCreateView ? "Create Booking" : "Create Booking Request"}</h2>
@@ -736,6 +1008,7 @@ function BookingsPage({ mode = "my" }) {
               </div>
             </form>
           </article>
+          )
         ) : null}
 
         {!isCreateView ? (

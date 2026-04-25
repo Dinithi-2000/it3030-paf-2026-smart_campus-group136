@@ -2,13 +2,27 @@ spring:
   application:
     name: smart-campus-backend
 
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://smart_campus:campus123@cluster0.fjz2qj0.mongodb.net/?appName=Cluster0}
-      database: smart-campus
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_campus_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root           # Change to your MySQL Workbench username
+    password: 1234          # Change to your MySQL Workbench password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update       # Creates/updates tables automatically
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
 
 server:
-  port: ${SERVER_PORT:8090}
+  port: ${SERVER_PORT:8080}
+
+google:
+  oauth:
+    client-id: 859816833703-8n10kjeca2ub8jr4hmme7oof4vi97f93.apps.googleusercontent.com
 
 logging:
   level:

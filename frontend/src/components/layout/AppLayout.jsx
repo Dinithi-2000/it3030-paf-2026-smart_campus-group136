@@ -1,19 +1,6 @@
-import TopNav from "./TopNav";
-import { useLocation } from "react-router-dom";
-
-function AppLayout({ children }) {
-  const location = useLocation();
-  const isDashboardRoute = location.pathname === "/";
-  const showTopNav = !isDashboardRoute;
-
-  return (
-    <div className={`page${isDashboardRoute ? " dashboard-page" : ""}`}>
-      <main className={`card${isDashboardRoute ? " full-bleed" : ""}`}>
-        {showTopNav && <TopNav />}
-        {children}
-      </main>
-    </div>
-  );
+/**
+ * @deprecated This component is legacy and has been replaced by DashboardShell.
+ */
+export default function AppLayout({ children }) {
+  return <>{children}</>;
 }
-
-export default AppLayout;

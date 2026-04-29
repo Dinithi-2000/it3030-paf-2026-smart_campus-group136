@@ -2,19 +2,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap");
 
 :root {
-  --ink-900: #0f2233;
-  --ink-700: #27465f;
-  --ink-500: #4b6b85;
-  --surface-0: #f7fafb;
+  --ink-900: #0F172A;
+  --ink-700: #0F172A;
+  --ink-500: #2563EB;
+  --surface-0: #F8FAFC;
   --surface-1: #ffffff;
-  --line: #d2e3ef;
-  --brand: #007a78;
-  --brand-strong: #046360;
-  --accent: #ff9f1a;
-  --hero-a: #0b3551;
-  --hero-b: #0e5b61;
+  --line: #E2E8F0;
+  --brand: #2563EB;
+  --brand-strong: #1E40AF;
+  --accent: #2563EB;
+  --hero-a: #0F172A;
+  --hero-b: #2563EB;
   color: var(--ink-900);
-  background: radial-gradient(circle at 8% 10%, #d5f6ef 0%, #eaf8ff 30%, #f7fbfd 100%);
+  background: radial-gradient(circle at 8% 10%, #DBEAFE 0%, #E0F2FE 30%, #F0F9FF 100%);
   font-family: "Plus Jakarta Sans", "Trebuchet MS", sans-serif;
 }
 
@@ -42,11 +42,11 @@ body {
 .card {
   width: min(1180px, 100%);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(247, 252, 255, 0.98)),
-    radial-gradient(circle at 100% 0%, rgba(0, 122, 120, 0.07), transparent 42%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.98)),
+    radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.07), transparent 42%);
   border-radius: 28px;
   padding: 28px;
-  box-shadow: 0 24px 52px rgba(15, 34, 51, 0.14);
+  box-shadow: 0 24px 52px rgba(15, 23, 42, 0.08);
   border: 1px solid var(--line);
 }
 
@@ -57,7 +57,7 @@ body {
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  background: #f6f9fb;
+  background: #F8FAFC;
 }
 
 .card.full-bleed .ops-shell {
@@ -117,8 +117,8 @@ body {
 }
 
 .top-nav-link:hover {
-  background: #ecf8f6;
-  color: #0b5f60;
+  background: #EFF6FF;
+  color: #2563EB;
 }
 
 .top-nav-link-active {
@@ -143,7 +143,7 @@ p {
   min-height: 0;
   display: grid;
   grid-template-columns: 252px 1fr;
-  background: #f6f9fb;
+  background: #F8FAFC;
   border: 0;
   border-radius: 0;
   overflow: hidden;
@@ -153,8 +153,8 @@ p {
 }
 
 .ops-sidebar {
-  background: #ffffff;
-  border-right: 1px solid #e7edf4;
+  background: #0F172A;
+  border-right: 1px solid #1E293B;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -173,7 +173,7 @@ p {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(145deg, #2f2969, #1f1955);
+  background: linear-gradient(145deg, #2563EB, #1D4ED8);
   color: #ffffff;
   display: grid;
   place-items: center;
@@ -189,7 +189,7 @@ p {
 
 .ops-brand p {
   margin: 0;
-  color: #7d8da1;
+  color: #94A3B8;
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   font-weight: 700;
@@ -203,7 +203,7 @@ p {
 
 .ops-menu-link {
   text-decoration: none;
-  color: #56697e;
+  color: #CBD5E1;
   font-size: 0.95rem;
   font-weight: 600;
   padding: 10px 12px;
@@ -228,14 +228,14 @@ p {
 }
 
 .ops-menu-link:hover {
-  background: #f2f6fb;
-  color: #243546;
+  background: rgba(37, 99, 235, 0.1);
+  color: #93C5FD;
 }
 
 .ops-menu-link-active {
-  background: linear-gradient(130deg, #2f2969, #1f1955);
+  background: linear-gradient(130deg, #2563EB, #1D4ED8);
   color: #ffffff;
-  box-shadow: 0 8px 18px rgba(47, 41, 105, 0.22);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
 }
 
 .ops-sidebar-foot {
@@ -246,10 +246,10 @@ p {
 
 .ops-sidebar-foot button {
   text-align: left;
-  border: 1px solid #e3e9f2;
+  border: 1px solid #334155;
   border-radius: 10px;
-  background: #ffffff;
-  color: #5a6f84;
+  background: #1E293B;
+  color: #CBD5E1;
   font-size: 0.85rem;
   font-weight: 600;
   padding: 8px 10px;
@@ -275,8 +275,8 @@ p {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #eef3f9;
-  color: #6f8296;
+  background: #334155;
+  color: #93C5FD;
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -289,7 +289,7 @@ p {
 .ops-topbar {
   height: 66px;
   background: #ffffff;
-  border-bottom: 1px solid #e7edf4;
+  border-bottom: 1px solid #E2E8F0;
   display: flex;
   align-items: center;
   justify-content: space-between;

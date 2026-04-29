@@ -14,7 +14,7 @@
 /* Left Panel - Branding */
 .auth-left-panel {
   flex: 1;
-  background: linear-gradient(135deg, #1a1f4d 0%, #2d3561 50%, #1a1f4d 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
   padding: 60px 50px;
   display: flex;
   flex-direction: column;
@@ -31,8 +31,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(100, 150, 255, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, rgba(100, 255, 200, 0.05) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -60,7 +60,7 @@
 .brand-logo svg {
   width: 28px;
   height: 28px;
-  color: #6ca5ff;
+  color: #93C5FD;
 }
 
 .brand-name {
@@ -149,7 +149,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #1a1f4d;
+  color: #0F172A;
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
@@ -159,7 +159,7 @@
 }
 
 .back-to-login:hover {
-  color: #6ca5ff;
+  color: #2563EB;
 }
 
 .back-to-login svg {
@@ -175,7 +175,7 @@
   margin: 0 0 8px 0;
   font-size: 32px;
   font-weight: 700;
-  color: #1a1f4d;
+  color: #0F172A;
 }
 
 .auth-form-subtitle {
@@ -250,7 +250,7 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #1a1f4d;
+  color: #0F172A;
   text-transform: uppercase;
 }
 
@@ -280,9 +280,9 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #6ca5ff;
+  border-color: #2563EB;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(108, 165, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .form-input:disabled {
@@ -318,13 +318,13 @@
 }
 
 .role-btn:hover:not(:disabled) {
-  border-color: #6ca5ff;
-  background: rgba(108, 165, 255, 0.05);
+  border-color: #2563EB;
+  background: rgba(37, 99, 235, 0.05);
 }
 
 .role-btn.active {
-  border-color: #1a1f4d;
-  background: #1a1f4d;
+  border-color: #0F172A;
+  background: #0F172A;
   color: #ffffff;
 }
 
@@ -392,7 +392,7 @@
 .auth-submit-btn {
   width: 100%;
   padding: 14px 16px;
-  background: linear-gradient(135deg, #1a1f4d 0%, #2d3561 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -412,7 +412,7 @@
 
 .auth-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(26, 31, 77, 0.3);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.3);
 }
 
 .auth-submit-btn:active:not(:disabled) {
@@ -454,7 +454,7 @@
 }
 
 .auth-footer-link {
-  color: #6ca5ff;
+  color: #2563EB;
   text-decoration: none;
   font-weight: 700;
   transition: all 0.3s ease;
@@ -462,7 +462,7 @@
 }
 
 .auth-footer-link:hover {
-  color: #2563eb;
+  color: #0F172A;
 }
 
 .loading-container {
@@ -470,7 +470,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1f4d 0%, #2d3561 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   color: white;
   font-size: 18px;
   font-weight: 600;

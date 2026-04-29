@@ -62,8 +62,8 @@ const KPI_ICONS = {
 };
 
 const TONE_STYLES = {
-  teal:   { card: "#e7f8f4", icon: "#0c9b7c", bar: "linear-gradient(90deg,#15b593,#20cb9e)" },
-  indigo: { card: "#eef0ff", icon: "#4940a3", bar: "linear-gradient(90deg,#2f2969,#4940a3)" },
+  teal:   { card: "#EFF6FF", icon: "#2563EB", bar: "linear-gradient(90deg,#2563EB,#3B82F6)" },
+  indigo: { card: "#FFFBEB", icon: "#F59E0B", bar: "linear-gradient(90deg,#F59E0B,#FBBF24)" },
   amber:  { card: "#fff8e7", icon: "#c69a2e", bar: "linear-gradient(90deg,#d18a12,#f2b429)" },
   rose:   { card: "#fff0f3", icon: "#cc4961", bar: "linear-gradient(90deg,#cc4961,#ef7a8a)" },
 };

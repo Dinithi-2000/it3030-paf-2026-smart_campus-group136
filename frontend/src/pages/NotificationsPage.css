@@ -13,7 +13,7 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #edf1f6;
+  border-bottom: 1px solid #E2E8F0;
 }
 
 .header-title {
@@ -79,28 +79,28 @@
 
 .filter-select:hover,
 .sort-select:hover {
-  border-color: #0066cc;
+  border-color: #2563EB;
 }
 
 .filter-select:focus,
 .sort-select:focus {
   outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .bulk-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  background-color: #fff3cd;
+  background-color: #DBEAFE;
   padding: 8px 15px;
   border-radius: 6px;
 }
 
 .bulk-actions span {
   font-weight: 600;
-  color: #856404;
+  color: #0F172A;
   font-size: 14px;
 }
 

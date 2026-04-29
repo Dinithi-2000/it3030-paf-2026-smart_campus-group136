@@ -34,7 +34,7 @@
 .report-stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #2563EB;
 }
 
 .report-stat-card::after {
@@ -44,7 +44,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: #3b82f6;
+  background: #2563EB;
   opacity: 0.8;
 }
 
